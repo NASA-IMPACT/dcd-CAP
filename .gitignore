@@ -1,5 +1,5 @@
 # Code Directories to Ignore on Push
-Code/__pycache__/
+CAP/Code/__pycache__/
 Output/
 
 # Any Environment Files Built

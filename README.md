@@ -15,7 +15,7 @@ The CDI Analysis Platform (CAP) was developed to automate the analysis and maint
 ---
 ## Install and Create a Virtual Environment
 
-**Clone the repo:** [https://github.com/NASA-IMPACT/CAP](https://github.com/NASA-IMPACT/CAP)
+**Clone the repo:** [https://github.com/NASA-IMPACT/dcd-CAP](https://github.com/NASA-IMPACT/dcd-CAP)
 
 **Go to the project directory:** `cd CAP`
 
