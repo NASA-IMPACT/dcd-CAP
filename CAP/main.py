@@ -12,8 +12,6 @@ from Code.export_json import Export_Update_CDI_JSON
 
 #################################################################################
 
-# Test
-
 def getparser():
 	'''Collect command line arguments
 	'''
@@ -27,8 +25,6 @@ def getparser():
 	return parser	
 
 #################################################################################
-
-# This comment was added as a test
 
 def main():
 
