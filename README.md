@@ -10,7 +10,7 @@ The CDI Analysis Platform (CAP) was developed to automate the analysis and maint
 
 # User's Guide
 
-*Note:* This program requires `Python 3.8` installed in your system.
+***Note:*** This program requires `Python 3.8` installed in your system.
 
 ---
 ## Install and Create a Virtual Environment
