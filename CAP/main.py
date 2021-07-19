@@ -26,6 +26,8 @@ def getparser():
 
 #################################################################################
 
+# This comment was added as a test
+
 def main():
 
 	today = datetime.datetime.today()
