@@ -9,6 +9,7 @@ from Code.cdi_class import CDI_Dataset
 from Code.cdi_validator import CDI_masterlist_QA, Export_QA_Updates
 from Code.tag_validator import Climate_Tag_Check, Export_Retag_Request
 from Code.export_json import Export_Update_CDI_JSON
+from Code.export_timeseries import Export_Time_Series_JSON
 
 #################################################################################
 
@@ -22,7 +23,7 @@ def getparser():
 	optionalargs = parser.add_argument_group("Optional Arguments")
 	optionalargs.add_argument("-test", "--test", action='store_true',required=False, help="Include to run CDI Scripts on Test Json File")
 
-	return parser	
+	return parser
 
 #################################################################################
 
@@ -128,18 +129,36 @@ def main():
 
 
 	#### Export QA Updates ####
+
 	qa_loc = Export_QA_Updates(updates, directory_dict[instance_dir])
 	print('Exported QA Updates Made: {}\n'.format(qa_loc))
 
 	
 	#### Export Retag Request ####
+
 	retag_loc = Export_Retag_Request(notags, directory_dict[instance_dir])
 	print('Exported Retag Request: {}\n'.format(retag_loc))
 	
 
 	#### Export Updated JSON ####
+
 	json_loc = Export_Update_CDI_JSON(cdi_datasets, directory_dict[instance_dir])
 	print('Exported Updated CDI JSON: {}\n'.format(json_loc))
+
+	#### Exporting Time Series Metrics ####
+
+	date = today.strftime("%m/%d/%Y %I:%M %p")
+	ml_count = len(cdi_datasets) # Only Including Working API links
+	cc_count = ml_count - len(notags) # Difference between notag list and ml = # in Climate Collection
+
+	timeseries_dict = {
+						"Date":date,
+						"Masterlist_Count":ml_count,
+						"Climate_Collection_Count":cc_count
+	}
+	
+	timeseries_loc = Export_Time_Series_JSON(timeseries_dict, directory_dict["Output"])
+	print('Exported CDI Metrics: {}\n'.format(timeseries_loc))
 
 #################################################################################
 

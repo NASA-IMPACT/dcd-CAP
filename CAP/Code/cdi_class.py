@@ -20,6 +20,9 @@ class CDI_Dataset:
 		self.datagov_ID = dataset['datagov_ID']
 		self.load_api_json()
 
+	def __str__(self):
+		return "{}".format(self.datagov_ID)
+
 	def load_api_json(self):
 		'''This method loads the API URL json - if the link is broken it 
 		will apply a "broken" value to the full_api_json attribute'''
@@ -32,10 +35,6 @@ class CDI_Dataset:
 
 		except urllib.error.HTTPError:
 			self.full_api_json = "Broken"
-
-
-	def __str__(self):
-		return "{}".format(self.datagov_ID)
 
 	def update_cdi_id(self, new_value):
 		self.cdi_id = new_value
