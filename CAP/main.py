@@ -62,12 +62,23 @@ def main():
 	#### Initialize list and add Dataset Objects ####
 
 	cdi_datasets = []
+	broken_datasets = []
+
+	print("Starting Dataset Ingest")
 
 	for ds_json in masterlist_json:
+
 		dataset = CDI_Dataset(ds_json)
-		cdi_datasets.append(dataset)
 
+		if dataset.full_api_json == "Broken":
+			broken_datasets.append(dataset)
+		else:
+			cdi_datasets.append(dataset)
 
+		# Standard Output
+		number = masterlist_json.index(ds_json) + 1
+		percentage = round(number/len(masterlist_json) * 100, 2)
+		print('\r\tPercentage Complete: {}%'.format(percentage), end="")
 
 
 	#### Start QA Analysis of CDI Masterlist ####
