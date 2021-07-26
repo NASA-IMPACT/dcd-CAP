@@ -8,7 +8,7 @@ import argparse
 from Code.cdi_class import CDI_Dataset
 from Code.cdi_validator import CDI_masterlist_QA, Export_QA_Updates
 from Code.tag_validator import Climate_Tag_Check, Export_Retag_Request
-from Code.export_json import Export_Update_CDI_JSON, Export_Time_Series_JSON
+from Code.export_json import Export_Update_CDI_JSON, Export_Time_Series_JSON, Export_Broken_JSON
 
 #################################################################################
 
@@ -143,6 +143,11 @@ def main():
 
 	json_loc = Export_Update_CDI_JSON(cdi_datasets, directory_dict[instance_dir])
 	print('Exported Updated CDI JSON: {}\n'.format(json_loc))
+
+	#### Export Broken Datasets ####
+
+	broken_loc = Export_Broken_JSON(broken_datasets, directory_dict[instance_dir])
+	print('Exported Updated CDI JSON: {}\n'.format(broken_loc))
 
 	#### Exporting Time Series Metrics ####
 

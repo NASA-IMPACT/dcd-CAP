@@ -70,8 +70,37 @@ def Export_Time_Series_JSON(time_series_dictionary, output_location):
 	
 	return output_path
 
+#################################################################################
 
+def Export_Broken_JSON(broken_datasets, output_location):
+	'''This function takes all of the Broken CDI Dataset objects
+	if there are any and outputs them.
+	'''
+
+	if len(broken_datasets) == 0:
+		return "No Broken Datasets Found"
+
+	# Set Outfile parameters
+
+	output_path = os.path.join(output_location, 'broken_api_urls.json')
+
+	# Convert objects into JSON
+	
+	list_of_datasets = [] # Initialize list of dataset dictionaries (or json)
+
+	for dataset in broken_datasets:
+
+		dataset_dict = dataset.export_dictionary() # Exports Dataset contents in dictionary
+
+		list_of_datasets.append(dataset_dict)
+
+	output_json = json.dumps(list_of_datasets, indent=4)
+
+	with open(output_path, 'w+') as outfile:
+		outfile.write(output_json)
+
+	return output_path
 
 #################################################################################
 
-#################################################################################
+
