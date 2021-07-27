@@ -63,17 +63,27 @@ def main():
 
 	cdi_datasets = []
 	broken_datasets = []
+	count = 1 # Initializes Count of Datasets for CDI_ID Renumbering
 
 	print("Starting Dataset Ingest")
 
 	for ds_json in masterlist_json:
 
+		# Create Dataset Object
 		dataset = CDI_Dataset(ds_json)
 
+		# API URL and JSON is broken, add to broken list
 		if dataset.full_api_json == "Broken":
 			broken_datasets.append(dataset)
-		else:
-			cdi_datasets.append(dataset)
+			continue
+
+		# Renumber CDI_ID
+
+		dataset.update_cdi_id(count)
+		count += 1
+
+		# Add dataset to list of dataset objects
+		cdi_datasets.append(dataset)
 
 		# Standard Output
 		number = masterlist_json.index(ds_json) + 1
