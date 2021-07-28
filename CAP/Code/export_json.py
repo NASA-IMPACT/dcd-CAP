@@ -103,4 +103,26 @@ def Export_Broken_JSON(broken_datasets, output_location):
 
 #################################################################################
 
+def export_list_of_dict_JSON(input_list_dict, output_location, filename):
+	'''This function takes any input list of dictionaries and outputs them into a 
+	JSON format with the provied output_location and filename
+	'''
+
+	output path = os.path.join(output_location, filename)
+
+	# Convert List of Dictionaries to JSON
+
+	output_json = json.dumps(input_list_dict, indent=4)
+
+	# Output JSON
+
+	with open(output_path, 'w+') as outfile:
+		outfile.write(output_json)
+
+	return output_path
+
+
+#################################################################################
+
+
 
