@@ -28,12 +28,12 @@ def getparser():
 
 def main():
 
-	today = datetime.datetime.today()
-	print("\nCDI Integrity Scripts\n\nDate: {}\n\n\n".format(today.strftime("%m/%d/%Y %I:%M %p")))
-
 	# Get Command Arguments
 	parser = getparser()
 	args = parser.parse_args()
+
+	today = datetime.datetime.today()
+	print("\nCDI Integrity Scripts\n\nDate: {}\n\n\n".format(today.strftime("%m/%d/%Y %I:%M %p")))
 
 
 	#### Define Directories ####
