@@ -6,7 +6,7 @@ import os
 import argparse
 
 from Code.cdi_class import CDI_Dataset
-from Code.cdi_validator import CDI_masterlist_QA, Export_QA_Updates
+from Code.cdi_validator import CDI_masterlist_QA, Export_QA_Updates, extra_data_gov, Export_Extra_CSV
 from Code.tag_validator import Climate_Tag_Check, Export_Retag_Request
 from Code.export_json import Export_Update_CDI_JSON
 
@@ -136,7 +136,9 @@ def main():
 	print()
 	print('\tClimate Check Complete\n\n')
 
-
+	print('Checking for datasets in the climate group that are not in the master list\n\n')
+	existing_loc=Export_Extra_CSV(extra_data_gov(masterlist_json), directory_dict[instance_dir])
+	print('Exported CSV of datasets not in the masterlist but on data.gov: {}\n'.format(existing_loc))
 
 	#### Export QA Updates ####
 	qa_loc = Export_QA_Updates(updates, directory_dict[instance_dir])
