@@ -66,18 +66,22 @@ def check_organization(cdi_dataset, api_json):
 def check_metadata_type(cdi_dataset, api_json):
 	api_extras = api_json['result']['extras']
 	cdi_metadata_type = cdi_dataset.metadata_type
-
+	found_key = False
 	for i in range(len(api_extras)):
 		extra_key = api_extras[i]['key']
 		api_extra_value = api_extras[i]['value']
 
 		if extra_key == 'metadata_type':
+			found_key=True
 			if cdi_metadata_type == api_extra_value:
 				return None
 			else:
 				cdi_dataset.update_metadata_type(api_extra_value)
 
 				return [cdi_metadata_type, api_extra_value]
+	if found_key == False:
+		cdi_dataset.update_metadata_type('No metadata type')
+		return [cdi_metadata_type, 'No metadata type']
 
 #################################################################################
 
