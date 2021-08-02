@@ -26,10 +26,29 @@ def getparser():
 
 #################################################################################
 
+def interpret_time(today):
+	hour=today.strftime("%H")
+	date=(today.strftime("%Y_%m_%d"))
+	quarter1=['3','4','5','6','7','8']
+	quarter2=['9','10','11','12','13','14']
+	quarter3=['15','16','17','18','19','20']
+	quarter4=['21','22','23','24','1','2']
+	if hour in quarter1:
+		quarter='1'
+	elif hour in quarter2:
+		quarter='2'	
+	elif hour in quarter3:
+		quarter='3'	
+	elif hour in quarter4:
+		quarter='4'	
+	return(date+"_"+quarter)
+
+##################################################################################
+
 def main():
 
 	today = datetime.datetime.today()
-	print("\nCDI Integrity Scripts\n\nDate: {}\n\n\n".format(today.strftime("%m/%d/%Y %I:%M %p")))
+	print("\nCDI Integrity Scripts\n\nDate: {}\n\n\n".format(interpret_time(today)))
 
 	# Get Command Arguments
 	parser = getparser()
@@ -41,7 +60,10 @@ def main():
 	current_working_dir = os.getcwd()
 
 	# Create Directories
-	instance_dir = 'Output/{}'.format(today.strftime("%Y_%m_%d_%I%M_%p"))
+	instance_dir = 'Output/{}'.format(interpret_time(today))
+
+
+
 	directories = ['Output', instance_dir]
 	directory_dict = create_directories(current_working_dir, directories)
 
