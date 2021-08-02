@@ -5,5 +5,7 @@ Output/
 # Any Environment Files Built
 .env/*
 
+env/*
+
 # Mac 
 .DS_Store
