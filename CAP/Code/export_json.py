@@ -108,7 +108,7 @@ def export_list_of_dict_JSON(input_list_dict, output_location, filename):
 	JSON format with the provied output_location and filename
 	'''
 
-	output path = os.path.join(output_location, filename)
+	output_path = os.path.join(output_location, filename)
 
 	# Convert List of Dictionaries to JSON
 
