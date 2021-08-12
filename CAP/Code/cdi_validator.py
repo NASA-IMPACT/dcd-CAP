@@ -16,10 +16,8 @@ def CDI_masterlist_QA(cdi_dataset):
 
 	change_dict = {}
 
-	# Open API URL Contents
-	api_url = cdi_dataset.api_url
-	api_request = urllib.request.urlopen(api_url)
-	api_json = json.load(api_request)
+	# Get API URL Contents
+	api_json = cdi_dataset.full_api_json
 
 	# Crossreference the CKAN API for dataset and check/update masterlist values
 	name_cat_change = check_name_and_update_caturl(cdi_dataset, api_json)
@@ -29,6 +27,9 @@ def CDI_masterlist_QA(cdi_dataset):
 
 	# Check for Climate Tag and gives True/False value for cdi_dataset.climate_tag
 	check_climate_tag(cdi_dataset, api_json)
+
+	# Check datagov_id against api_url
+	datagov_id_change = check_datagov_id(cdi_dataset)
 
 	# Compile the updates made and return them as a dictionary
 	if name_cat_change:
@@ -46,6 +47,9 @@ def CDI_masterlist_QA(cdi_dataset):
 
 	if metadata_type_change:
 		change_dict['metadata_type'] = metadata_type_change
+
+	if datagov_id_change:
+		change_dict['datagov_id'] = datagov_id_change
 
 
 	return change_dict
