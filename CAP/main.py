@@ -9,6 +9,7 @@ from Code.cdi_class import CDI_Dataset
 from Code.cdi_validator import CDI_masterlist_QA, Export_QA_Updates
 from Code.tag_validator import Climate_Tag_Check, Export_Retag_Request
 from Code.export_json import Export_Update_CDI_JSON
+from Code.export_json import Export_Original_CDI_JSON
 
 #################################################################################
 
@@ -28,12 +29,12 @@ def getparser():
 
 def main():
 
-	today = datetime.datetime.today()
-	print("\nCDI Integrity Scripts\n\nDate: {}\n\n\n".format(today.strftime("%m/%d/%Y %I:%M %p")))
-
 	# Get Command Arguments
 	parser = getparser()
 	args = parser.parse_args()
+
+	today = datetime.datetime.today()
+	print("\nCDI Integrity Scripts\n\nDate: {}\n\n\n".format(today.strftime("%m/%d/%Y %I:%M %p")))
 
 
 	#### Define Directories ####
@@ -67,6 +68,9 @@ def main():
 		dataset = CDI_Dataset(ds_json)
 		cdi_datasets.append(dataset)
 
+	
+	og_json_loc = Export_Original_CDI_JSON(cdi_datasets, directory_dict[instance_dir])
+	print('Exported Original CDI JSON: {}\n'.format(og_json_loc))
 
 
 
