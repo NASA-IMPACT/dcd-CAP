@@ -8,7 +8,8 @@ import argparse
 from Code.cdi_class import CDI_Dataset
 from Code.cdi_validator import CDI_masterlist_QA, Export_QA_Updates
 from Code.tag_validator import Climate_Tag_Check, Export_Retag_Request
-from Code.export_json import Export_Update_CDI_JSON, Export_Time_Series_JSON, Export_Broken_JSON
+from Code.export_json import Export_Update_CDI_JSON, Export_Time_Series_JSON, Export_Broken_JSON, Export_Original_CDI_JSON
+
 
 #################################################################################
 
@@ -28,12 +29,12 @@ def getparser():
 
 def main():
 
-	today = datetime.datetime.today()
-	print("\nCDI Integrity Scripts\n\nDate: {}\n\n\n".format(today.strftime("%m/%d/%Y %I:%M %p")))
-
 	# Get Command Arguments
 	parser = getparser()
 	args = parser.parse_args()
+
+	today = datetime.datetime.today()
+	print("\nCDI Integrity Scripts\n\nDate: {}\n\n\n".format(today.strftime("%m/%d/%Y %I:%M %p")))
 
 
 	#### Define Directories ####
@@ -72,6 +73,7 @@ def main():
 		# Create Dataset Object
 		dataset = CDI_Dataset(ds_json)
 
+
 		# API URL and JSON is broken, add to broken list
 		if dataset.full_api_json == "Broken":
 			broken_datasets.append(dataset)
@@ -82,6 +84,7 @@ def main():
 		dataset.update_cdi_id(count)
 		count += 1
 
+
 		# Add dataset to list of dataset objects
 		cdi_datasets.append(dataset)
 
@@ -89,6 +92,10 @@ def main():
 		number = masterlist_json.index(ds_json) + 1
 		percentage = round(number/len(masterlist_json) * 100, 2)
 		print('\r\tPercentage Complete: {}%'.format(percentage), end="")
+  
+  # Export Original JSON
+  og_json_loc = Export_Original_CDI_JSON(cdi_datasets, directory_dict[instance_dir])
+	print('Exported Original CDI JSON: {}\n'.format(og_json_loc))
 
 
 	#### Start QA Analysis of CDI Masterlist ####

@@ -81,6 +81,21 @@ def check_metadata_type(cdi_dataset, api_json):
 
 #################################################################################
 
+def check_datagov_id(cdi_dataset):
+	api_url = cdi_dataset.api_url
+	datagov_id = cdi_dataset.datagov_ID
+	
+	api_url_id = api_url.replace("https://catalog.data.gov/api/3/action/package_show?id=", "")
+
+	if datagov_id == api_url_id:
+		return None
+	else:
+		cdi_dataset.update_datagov_ID(api_url_id)
+		return [datagov_id, api_url_id]
+
+
+#################################################################################
+
 def check_climate_tag(cdi_dataset, api_json):
 	# Check Tag
 
