@@ -15,10 +15,8 @@ def CDI_masterlist_QA(cdi_dataset):
 
 	change_dict = {}
 
-	# Open API URL Contents
-	api_url = cdi_dataset.api_url
-	api_request = urllib.request.urlopen(api_url)
-	api_json = json.load(api_request)
+	# Get API URL Contents
+	api_json = cdi_dataset.full_api_json
 
 	# Crossreference the CKAN API for dataset and check/update masterlist values
 	name_cat_change = check_name_and_update_caturl(cdi_dataset, api_json)
