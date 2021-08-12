@@ -92,9 +92,9 @@ def main():
 		number = masterlist_json.index(ds_json) + 1
 		percentage = round(number/len(masterlist_json) * 100, 2)
 		print('\r\tPercentage Complete: {}%'.format(percentage), end="")
-  
-  # Export Original JSON
-  og_json_loc = Export_Original_CDI_JSON(cdi_datasets, directory_dict[instance_dir])
+  	
+	# Export Original JSON
+  	og_json_loc = Export_Original_CDI_JSON(cdi_datasets, directory_dict[instance_dir])
 	print('Exported Original CDI JSON: {}\n'.format(og_json_loc))
 
 
