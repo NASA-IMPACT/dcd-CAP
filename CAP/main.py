@@ -30,7 +30,6 @@ def getparser():
 def interpret_time(today):
 	hour=today.strftime("%H")
 	date=(today.strftime("%Y_%m_%d"))
-	print(hour)
 	quarter1=['03','04','05','06','07','08']
 	quarter2=['09','10','11','12','13','14']
 	quarter3=['15','16','17','18','19','20']
@@ -118,7 +117,7 @@ def main():
   	
 	# Export Original JSON
 	og_json_loc = Export_Original_CDI_JSON(cdi_datasets, directory_dict[instance_dir])
-	print('Exported Original CDI JSON: {}\n'.format(og_json_loc))
+	print('\n\nExported Original CDI JSON: {}\n'.format(og_json_loc))
 
 
 	#### Start QA Analysis of CDI Masterlist ####
@@ -165,9 +164,12 @@ def main():
 	print()
 	print('\tClimate Check Complete\n\n')
 
-	print('Checking for datasets in the climate group that are not in the master list\n\n')
-	existing_loc=Export_Extra_CSV(extra_data_gov(masterlist_json), directory_dict[instance_dir])
-	print('Exported CSV of datasets not in the masterlist but on data.gov: {}\n'.format(existing_loc))
+	#### Check for Datasets in CC, not in Masterlist ####
+
+	print('Checking for Datasets in the Data.gov Climate Collection\nthat are not in the CDI Master List....\n\n')
+	extra_dict = extra_data_gov(masterlist_json)
+
+	############################################
 
 	#### Export QA Updates ####
 
@@ -190,6 +192,10 @@ def main():
 
 	broken_loc = Export_Broken_JSON(broken_datasets, directory_dict[instance_dir])
 	print('Exported Updated CDI JSON: {}\n'.format(broken_loc))
+
+	#### Export Extra CDI Datasets ####
+	extra_loc = Export_Extra_CSV(extra_dict, directory_dict[instance_dir])
+	print('Exported CSV of datasets not in the masterlist but on data.gov: {}\n'.format(extra_loc))
 
 	#### Exporting Time Series Metrics ####
 
