@@ -6,9 +6,9 @@ import os
 import argparse
 
 from Code.cdi_class import CDI_Dataset
-from Code.cdi_validator import CDI_masterlist_QA, Export_QA_Updates, extra_data_gov, Export_Extra_CSV
+from Code.cdi_validator import CDI_masterlist_QA, extra_data_gov, Export_Extra_CSV
 from Code.tag_validator import Climate_Tag_Check, Export_Retag_Request
-from Code.export_json import Export_Update_CDI_JSON, Export_Time_Series_JSON, Export_Broken_JSON, Export_Original_CDI_JSON
+from Code.export_json import Export_Update_CDI_JSON, Export_Time_Series_JSON, Export_Broken_JSON, Export_Original_CDI_JSON, export_list_of_dict_JSON
 
 
 #################################################################################
@@ -124,14 +124,14 @@ def main():
 
 	print("Starting CDI Masterlist QA Check")
 
-	updates = {} #Initiatlize dictionary of updates (Uses CDI_ID as key)
+	updates = []
 
 	for cdi_dataset in cdi_datasets:
 
 		an_update = CDI_masterlist_QA(cdi_dataset)
 
 		if an_update: # Empty Dictionary = False Bool
-			updates[cdi_dataset.cdi_id] = an_update # Creates dictionary entry with CDI_ID of dataset as key)
+			updates.append(an_update)
 
 		# Standard Output
 		number = cdi_datasets.index(cdi_dataset) + 1
@@ -173,7 +173,8 @@ def main():
 
 	#### Export QA Updates ####
 
-	qa_loc = Export_QA_Updates(updates, directory_dict[instance_dir])
+	#qa_loc = Export_QA_Updates(updates, directory_dict[instance_dir])
+	qa_loc = export_list_of_dict_JSON(updates, directory_dict[instance_dir], "QA_Updates.json")
 	print('Exported QA Updates Made: {}\n'.format(qa_loc))
 
 	
