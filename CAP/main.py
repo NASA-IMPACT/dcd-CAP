@@ -30,10 +30,11 @@ def getparser():
 def interpret_time(today):
 	hour=today.strftime("%H")
 	date=(today.strftime("%Y_%m_%d"))
-	quarter1=['3','4','5','6','7','8']
-	quarter2=['9','10','11','12','13','14']
+	print(hour)
+	quarter1=['03','04','05','06','07','08']
+	quarter2=['09','10','11','12','13','14']
 	quarter3=['15','16','17','18','19','20']
-	quarter4=['21','22','23','24','1','2']
+	quarter4=['21','22','23','24','01','02']
 	if hour in quarter1:
 		quarter='1'
 	elif hour in quarter2:
@@ -116,7 +117,7 @@ def main():
 		print('\r\tPercentage Complete: {}%'.format(percentage), end="")
   	
 	# Export Original JSON
-  	og_json_loc = Export_Original_CDI_JSON(cdi_datasets, directory_dict[instance_dir])
+	og_json_loc = Export_Original_CDI_JSON(cdi_datasets, directory_dict[instance_dir])
 	print('Exported Original CDI JSON: {}\n'.format(og_json_loc))
 
 
