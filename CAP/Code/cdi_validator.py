@@ -56,24 +56,35 @@ def CDI_masterlist_QA(cdi_dataset):
 
 #################################################################################
 def extra_data_gov(masterlist_json):
-	''' This function checks all the datasets in the data.gov climate group against the data gov ids in the masterlist to identify mislabeled data. '''
-	not_in_master_full=pd.DataFrame({})
-	api_call=requests.get('https://catalog.data.gov/api/3/action/package_search?fq=groups:climate5434&rows=2000').json()
-	data_gov_id_df=(pd.json_normalize(api_call['result']['results']))
-	masterlist_id_list=(pd.json_normalize(masterlist_json)['datagov_ID']).tolist()
-	data_gov_id_df['API']=''
-	data_gov_id_df['Catalog']=''
+	''' This function checks all the datasets in the data.gov climate group 
+	against the data gov ids in the masterlist to identify mislabeled data. '''
 
+	not_in_master_full = pd.DataFrame({}) # Create empty dataframe
+
+	# Call Full Climate Collection (CC) API
+	api_call = requests.get('https://catalog.data.gov/api/3/action/package_search?fq=groups:climate5434&rows=2000').json()
+	data_gov_id_df = (pd.json_normalize(api_call['result']['results'])) # Create a Dataframe of all Data.gov IDs in Data.gov CC
+
+	# Set up list of all CDI Masterlist IDs
+	masterlist_id_list = (pd.json_normalize(masterlist_json)['datagov_ID']).tolist()
+	data_gov_id_df['API'] = ''
+	data_gov_id_df['Catalog'] = ''
+
+	# Loop through Climate Collection DataFrame
 	for index,row in data_gov_id_df.iterrows():
+
+		# Crossreference with CDI Masterlist (ML) and if not in ML, record dataset attributes
 		if row['id'] in masterlist_id_list:
 			pass
 		else:
-			row['API']='https://catalog.data.gov/api/3/action/package_show?id={}'.format(row['id'])
-			row['Catalog']='https://catalog.data.gov/dataset/{}'.format(row['name'])
-			not_in_master_full=not_in_master_full.append(row)	
+			row['API'] = 'https://catalog.data.gov/api/3/action/package_show?id={}'.format(row['id'])
+			row['Catalog'] = 'https://catalog.data.gov/dataset/{}'.format(row['name'])
+			not_in_master_full = not_in_master_full.append(row)
 
-	formatted_df=pd.DataFrame({'Title':not_in_master_full['title'],'Name':not_in_master_full['name'],'API':not_in_master_full['API'],'Catalog':not_in_master_full['Catalog']})
-	dictionary=formatted_df.to_dict('index')
+	# Reformat Output Dataframe and convert to Dictionary
+	formatted_df = pd.DataFrame({'Title':not_in_master_full['title'],'Name':not_in_master_full['name'],'API':not_in_master_full['API'],'Catalog':not_in_master_full['Catalog']})
+	dictionary = formatted_df.to_dict('index')
+	
 	return dictionary
 
 
@@ -119,10 +130,15 @@ def Export_QA_Updates(update_dict, output_location):
 #################################################################################
 
 def Export_Extra_CSV(dictionary, output_location):
-	'accepts dictionary and output location, converts to csv'
+	'''This function accepts a the extra Climate Collection datasets
+	dictionary and output location, converts to csv'''
+
 	dataframe=(pd.DataFrame.from_dict(dictionary, orient='index'))
+
 	output_path = os.path.join(output_location, 'data_gov_not_master.csv')
+
 	dataframe.to_csv(output_path, index=False)
+
 	return output_path
 
 #################################################################################
