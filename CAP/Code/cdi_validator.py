@@ -90,7 +90,7 @@ def extra_data_gov(masterlist_json):
 
 #################################################################################
 
-def Export_QA_Updates(update_dict, output_location):
+def Export_QA_Updates(update_dict, output_location, today_quartered):
 	'''This function takes the compiled dictionary of QA Updates and
 	outputs them to a readable text file
 	'''
@@ -99,7 +99,7 @@ def Export_QA_Updates(update_dict, output_location):
 
 	today = datetime.datetime.today().strftime("%m/%d/%Y %I:%M %p")
 
-	output_path = os.path.join(output_location, 'CDI_QA.txt'.format(today))
+	output_path = os.path.join(output_location, 'QA_Updates_'+today_quartered+'.txt'.format(today))
 
 	# Open Output Document
 	output_doc = open(output_path, 'w+')
@@ -129,13 +129,13 @@ def Export_QA_Updates(update_dict, output_location):
 
 #################################################################################
 
-def Export_Extra_CSV(dictionary, output_location):
+def Export_Extra_CSV(dictionary, output_location, today_quartered):
 	'''This function accepts a the extra Climate Collection datasets
 	dictionary and output location, converts to csv'''
 
 	dataframe=(pd.DataFrame.from_dict(dictionary, orient='index'))
 
-	output_path = os.path.join(output_location, 'data_gov_not_master.csv')
+	output_path = os.path.join(output_location, 'data_gov_not_master_'+today_quartered+'.csv')
 
 	dataframe.to_csv(output_path, index=False)
 
