@@ -40,10 +40,8 @@ def CDI_masterlist_QA(cdi_dataset):
 	change_dict['metadata_type'] = invalid_updated_todict(metadata_type_change)
 	change_dict['datagov_id'] = invalid_updated_todict(datagov_id_change)
 
-	return change_dict
-
 	# Use below code to only return if the dictionary has updates
-	''' 
+	 
 	# Return dictionary IF there are values
 	change_list = [name_change, catalog_change, title_change, org_change, metadata_type_change, datagov_id_change]
 
@@ -52,7 +50,7 @@ def CDI_masterlist_QA(cdi_dataset):
 			return change_dict
 
 	return None
-	'''
+	
 
 #################################################################################
 
