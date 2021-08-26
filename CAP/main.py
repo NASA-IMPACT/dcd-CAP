@@ -8,7 +8,7 @@ import argparse
 from Code.cdi_class import CDI_Dataset
 from Code.cdi_validator import CDI_masterlist_QA, extra_data_gov, Export_Extra_CSV
 from Code.tag_validator import Climate_Tag_Check, Export_Retag_Request
-from Code.export_json import Export_Update_CDI_JSON, Export_Time_Series_JSON, Export_Broken_JSON, Export_Original_CDI_JSON, export_list_of_dict_JSON
+from Code.export_json import Export_Update_CDI_JSON, Export_Time_Series_JSON, Export_Broken_JSON, Export_Original_CDI_JSON, export_list_of_dict_JSON, Export_Object_to_JSON
 
 
 #################################################################################
@@ -53,6 +53,7 @@ def main():
 	args = parser.parse_args()
 
 	today = datetime.datetime.today()
+	today_quartered=interpret_time(today)
 	print("\nCDI Integrity Scripts\n\nDate: {}\n\n\n".format(interpret_time(today)))
 
 
@@ -170,6 +171,7 @@ def main():
 	extra_dict = extra_data_gov(masterlist_json)
 
 	############################################
+	################# EXPORTS ##################
 
 	#### Export QA Updates ####
 
@@ -177,11 +179,17 @@ def main():
 	qa_loc = export_list_of_dict_JSON(updates, directory_dict[instance_dir], "QA_Updates.json")
 	print('Exported QA Updates Made: {}\n'.format(qa_loc))
 
-	
-	#### Export Retag Request ####
+	#### Export Retag Dataset ####
 
-	retag_loc = Export_Retag_Request(notags, directory_dict[instance_dir])
-	print('Exported Retag Request: {}\n'.format(retag_loc))
+	retag_filename = 'retag_{}.json'.format(today_quartered)
+	retag_loc = Export_Object_to_JSON(notags, directory_dict[instance_dir], retag_filename)
+	print('Export Retag Datasets: {}\n'.format(retag_loc))
+
+	
+	#### Export Retag Request Excel ####
+
+	retag_request_loc = Export_Retag_Request(notags, directory_dict[instance_dir])
+	print('Exported Retag Request: {}\n'.format(retag_request_loc))
 	
 
 	#### Export Updated JSON ####
