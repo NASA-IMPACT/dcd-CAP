@@ -84,8 +84,9 @@ def extra_data_gov(masterlist_json):
 	# Reformat Output Dataframe and convert to Dictionary
 	formatted_df = pd.DataFrame({'Title':not_in_master_full['title'],'Name':not_in_master_full['name'],'API':not_in_master_full['API'],'Catalog':not_in_master_full['Catalog']})
 	dictionary = formatted_df.to_dict('index')
+	extra_list_of_dictionaries= [value for value in dictionary.values()]
 	
-	return dictionary
+	return extra_list_of_dictionaries
 
 
 #################################################################################
@@ -126,19 +127,5 @@ def Export_QA_Updates(update_dict, output_location, today_quartered):
 
 	return output_path
 
-
-#################################################################################
-
-def Export_Extra_CSV(dictionary, output_location, today_quartered):
-	'''This function accepts a the extra Climate Collection datasets
-	dictionary and output location, converts to csv'''
-
-	dataframe=(pd.DataFrame.from_dict(dictionary, orient='index'))
-
-	output_path = os.path.join(output_location, 'data_gov_not_master_'+today_quartered+'.csv')
-
-	dataframe.to_csv(output_path, index=False)
-
-	return output_path
 
 #################################################################################

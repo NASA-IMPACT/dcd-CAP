@@ -6,9 +6,9 @@ import os
 import argparse
 
 from Code.cdi_class import CDI_Dataset
-from Code.cdi_validator import CDI_masterlist_QA, Export_QA_Updates, extra_data_gov, Export_Extra_CSV
+from Code.cdi_validator import CDI_masterlist_QA, Export_QA_Updates, extra_data_gov
 from Code.tag_validator import Climate_Tag_Check, Export_Retag_Request
-from Code.export_json import Export_Update_CDI_JSON, Export_Time_Series_JSON, Export_Broken_JSON, Export_Original_CDI_JSON
+from Code.export_json import Export_Update_CDI_JSON, Export_Time_Series_JSON, Export_Broken_JSON, Export_Original_CDI_JSON,export_list_of_dict_JSON
 
 
 
@@ -169,7 +169,7 @@ def main():
 	#### Check for Datasets in CC, not in Masterlist ####
 
 	print('Checking for Datasets in the Data.gov Climate Collection\nthat are not in the CDI Master List....\n\n')
-	extra_dict = extra_data_gov(masterlist_json)
+	extras = extra_data_gov(masterlist_json)
 
 	############################################
 
@@ -196,7 +196,7 @@ def main():
 	print('Exported Updated CDI JSON: {}\n'.format(broken_loc))
 
 	#### Export Extra CDI Datasets ####
-	extra_loc = Export_Extra_CSV(extra_dict, directory_dict[instance_dir],today_quartered)
+	extra_loc = export_list_of_dict_JSON(extras, directory_dict[instance_dir], 'data_gov_not_master_', today_quartered)
 	print('Exported CSV of datasets not in the masterlist but on data.gov: {}\n'.format(extra_loc))
 
 	#### Exporting Time Series Metrics ####

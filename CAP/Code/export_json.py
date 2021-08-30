@@ -132,12 +132,12 @@ def Export_Broken_JSON(broken_datasets, output_location,today_quartered):
 
 #################################################################################
 
-def export_list_of_dict_JSON(input_list_dict, output_location, filename):
+def export_list_of_dict_JSON(input_list_dict, output_location, filename, today_quartered):
 	'''This function takes any input list of dictionaries and outputs them into a 
 	JSON format with the provied output_location and filename
 	'''
 	
-	output_path = os.path.join(output_location, filename)
+	output_path = os.path.join(output_location, filename+today_quartered+'.json')
 
 	# Convert List of Dictionaries to JSON
 
