@@ -64,7 +64,7 @@ def extra_data_gov(masterlist_json):
 	# Call Full Climate Collection (CC) API
 	api_call = requests.get('https://catalog.data.gov/api/3/action/package_search?fq=groups:climate5434&rows=2000').json()
 	data_gov_id_df = (pd.json_normalize(api_call['result']['results'])) # Create a Dataframe of all Data.gov IDs in Data.gov CC
-
+	climate_collection=data_gov_id_df
 	# Set up list of all CDI Masterlist IDs
 	masterlist_id_list = (pd.json_normalize(masterlist_json)['datagov_ID']).tolist()
 	data_gov_id_df['API'] = ''
@@ -86,7 +86,7 @@ def extra_data_gov(masterlist_json):
 	dictionary = formatted_df.to_dict('index')
 	extra_list_of_dictionaries= [value for value in dictionary.values()]
 	
-	return extra_list_of_dictionaries
+	return extra_list_of_dictionaries, climate_collection
 
 
 #################################################################################

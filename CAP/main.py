@@ -4,6 +4,7 @@ import json
 import datetime
 import os
 import argparse
+import pandas as pd
 
 from Code.cdi_class import CDI_Dataset
 from Code.cdi_validator import CDI_masterlist_QA, Export_QA_Updates, extra_data_gov
@@ -44,6 +45,19 @@ def interpret_time(today):
 	elif hour in quarter4:
 		quarter='4'	
 	return(date+"_"+quarter)
+
+##################################################################################
+def obj_to_df(obj):
+
+	list_of_datasets = [] # Initialize list of dataset dictionaries (or json)
+
+	for dataset in obj:
+
+		dataset_dict = dataset.export_dictionary() # Exports Dataset contents in dictionary
+
+		list_of_datasets.append(dataset_dict)
+
+	return(pd.DataFrame(list_of_datasets))
 
 ##################################################################################
 
@@ -169,7 +183,7 @@ def main():
 	#### Check for Datasets in CC, not in Masterlist ####
 
 	print('Checking for Datasets in the Data.gov Climate Collection\nthat are not in the CDI Master List....\n\n')
-	extras = extra_data_gov(masterlist_json)
+	extras, climate_collection = extra_data_gov(masterlist_json)
 
 	############################################
 
@@ -202,8 +216,10 @@ def main():
 	#### Exporting Time Series Metrics ####
 
 	date = today.strftime("%m/%d/%Y %I:%M %p")
-	ml_count = len(cdi_datasets) # Only Including Working API links
-	cc_count = ml_count - len(notags) # Difference between notag list and ml = # in Climate Collection
+	
+	cdi_datasets_df=obj_to_df(cdi_datasets)
+	ml_count = len(cdi_datasets_df[cdi_datasets_df['is_active']=="True"])# Only Including Working API links
+	cc_count = len(climate_collection) # from data.gov Climate Collection
 
 	timeseries_dict = {
 						"Date":date,
