@@ -64,7 +64,7 @@ def extra_data_gov(masterlist_json):
 	# Call Full Climate Collection (CC) API
 	api_call = requests.get('https://catalog.data.gov/api/3/action/package_search?fq=groups:climate5434&rows=2000').json()
 	data_gov_id_df = (pd.json_normalize(api_call['result']['results'])) # Create a Dataframe of all Data.gov IDs in Data.gov CC
-
+	climate_collection=data_gov_id_df
 	# Set up list of all CDI Masterlist IDs
 	masterlist_id_list = (pd.json_normalize(masterlist_json)['datagov_ID']).tolist()
 	data_gov_id_df['API'] = ''
@@ -84,13 +84,14 @@ def extra_data_gov(masterlist_json):
 	# Reformat Output Dataframe and convert to Dictionary
 	formatted_df = pd.DataFrame({'Title':not_in_master_full['title'],'Name':not_in_master_full['name'],'API':not_in_master_full['API'],'Catalog':not_in_master_full['Catalog']})
 	dictionary = formatted_df.to_dict('index')
+	extra_list_of_dictionaries= [value for value in dictionary.values()]
 	
-	return dictionary
+	return extra_list_of_dictionaries, climate_collection
 
 
 #################################################################################
 
-def Export_QA_Updates(update_dict, output_location):
+def Export_QA_Updates(update_dict, output_location, today_quartered):
 	'''This function takes the compiled dictionary of QA Updates and
 	outputs them to a readable text file
 	'''
@@ -99,7 +100,7 @@ def Export_QA_Updates(update_dict, output_location):
 
 	today = datetime.datetime.today().strftime("%m/%d/%Y %I:%M %p")
 
-	output_path = os.path.join(output_location, 'CDI_QA.txt'.format(today))
+	output_path = os.path.join(output_location, 'QA_Updates_'+today_quartered+'.txt'.format(today))
 
 	# Open Output Document
 	output_doc = open(output_path, 'w+')
@@ -126,19 +127,5 @@ def Export_QA_Updates(update_dict, output_location):
 
 	return output_path
 
-
-#################################################################################
-
-def Export_Extra_CSV(dictionary, output_location):
-	'''This function accepts a the extra Climate Collection datasets
-	dictionary and output location, converts to csv'''
-
-	dataframe=(pd.DataFrame.from_dict(dictionary, orient='index'))
-
-	output_path = os.path.join(output_location, 'data_gov_not_master.csv')
-
-	dataframe.to_csv(output_path, index=False)
-
-	return output_path
 
 #################################################################################

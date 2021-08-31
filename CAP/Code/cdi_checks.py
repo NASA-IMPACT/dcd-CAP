@@ -94,7 +94,7 @@ def check_metadata_type(cdi_dataset, api_json):
 				cdi_dataset.update_metadata_type(api_extra_value)
 
 				return [cdi_metadata_type, api_extra_value]
-	if found_key == False:
+	if found_key == False and cdi_metadata_type != 'No metadata type':
 		cdi_dataset.update_metadata_type('No metadata type')
 		return [cdi_metadata_type, 'No metadata type']
 

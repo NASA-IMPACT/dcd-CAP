@@ -42,14 +42,14 @@ def format_retag_request_excel(path_to_document):
 
 #################################################################################
 
-def Export_Retag_Request(cdi_datasets, output_location):
+def Export_Retag_Request(cdi_datasets, output_location,today_quartered):
 	'''This function takes the cdi objects that do not have the climate tag and
 	outputs them to an excel file
 	'''
 	
 	# Set Outfile parameters
 
-	output_path = os.path.join(output_location, 'retag_request.xlsx')
+	output_path = os.path.join(output_location, 'retag_request_'+today_quartered+'.xlsx')
 
 	output_json = [] # Initialize list of dataset dictionaries (or json)
 
