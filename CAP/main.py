@@ -9,7 +9,7 @@ import pandas as pd
 from Code.cdi_class import CDI_Dataset
 from Code.cdi_validator import CDI_masterlist_QA, Export_QA_Updates, extra_data_gov
 from Code.tag_validator import Climate_Tag_Check, Export_Retag_Request
-from Code.export_json import Export_Update_CDI_JSON, Export_Time_Series_JSON, Export_Broken_JSON, Export_Original_CDI_JSON,export_list_of_dict_JSON
+from Code.export_json import Export_Update_CDI_JSON, Export_Time_Series_JSON, Export_Broken_JSON, Export_Original_CDI_JSON, export_list_of_dict_JSON, Export_Warnings_Summary_JSON
 
 
 
@@ -69,7 +69,8 @@ def main():
 
 	today = datetime.datetime.today()
 	today_quartered=interpret_time(today)
-	print("\nCDI Integrity Scripts\n\nDate: {}\n\n\n".format(today))
+	print("\nCDI Integrity Scripts\n\nDate: {}\n\n\n".format(today_quartered))
+
 
 
 	#### Define Directories ####
@@ -229,6 +230,23 @@ def main():
 	
 	timeseries_loc = Export_Time_Series_JSON(timeseries_dict, directory_dict["Output"],today_quartered)
 	print('Exported CDI Metrics: {}\n'.format(timeseries_loc))
+
+	### Export Warnings Summary Master File ###
+	
+	date = today.strftime("%m/%d/%Y %I:%M %p")
+	total_warnings = len(broken_datasets) + len(notags) + len(extra_dict)
+
+	warnings_dict = {
+						"Date": date,
+						"Total Warnings": total_warnings,
+						"Broken URLs Count": len(broken_datasets),
+						"Lost Climate Tag Count": len(notags),
+						"Not in Masterlist Count": len(extra_dict)
+	}
+	
+	warnings_loc = Export_Warnings_Summary_JSON(warnings_dict, directory_dict["Output"])
+	print('Exported Warnings: {}\n'.format(warnings_loc))
+
 
 #################################################################################
 

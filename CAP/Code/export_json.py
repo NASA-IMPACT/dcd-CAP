@@ -153,5 +153,44 @@ def export_list_of_dict_JSON(input_list_dict, output_location, filename, today_q
 
 #################################################################################
 
+def Export_Warnings_Summary_JSON(warnings_dictionary, output_location):
+	'''This function exports a warnings summary json by creating a new file or 
+	appending to the existing one
+	'''
+	
+	output_path = os.path.join(output_location, "Warnings_Summary.json")
 
+	try: # Will Try to add to existing Metric File
+
+		with open(output_path) as archive_file:
+			archive_json = json.load(archive_file)
+		
+		# Make sure the same time is only in the json once
+
+		for instance in archive_json:
+
+			if instance["Date"] == warnings_dictionary["Date"]:
+				return output_path
+			else:
+				continue
+
+		# Adds New to Archive and Writes Files
+
+		archive_json.append(warnings_dictionary)
+		output_json = json.dumps(archive_json, indent=4)
+
+		with open(output_path, 'w+') as writefile:
+			writefile.write(output_json)
+
+	
+	except: # Will create new metric file if it does not exist
+
+		output_json = json.dumps([warnings_dictionary], indent=4) # For Formatting
+
+		with open(output_path, 'w+') as writefile:
+			writefile.write(output_json)
+	
+	return output_path
+
+############################################################################################
 
