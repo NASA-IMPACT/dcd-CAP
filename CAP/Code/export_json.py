@@ -31,14 +31,15 @@ def Export_Object_to_JSON(cdi_datasets, output_location, filename):
 
 #################################################################################
 
-def Export_Original_CDI_JSON(cdi_datasets, output_location):
+
+def Export_Original_CDI_JSON(cdi_datasets, output_location,today_quartered):
 	'''This function takes all of the CDI Dataset objects (original)
 	and exports them as the full Original JSON
 	'''
 
 	# Set Outfile parameters
 
-	output_path = os.path.join(output_location, 'original_CDI_Masterlist.json')
+	output_path = os.path.join(output_location, 'original_CDI_Masterlist_'+today_quartered+'.json')
 
 	# Convert objects into JSON
 	
@@ -60,14 +61,14 @@ def Export_Original_CDI_JSON(cdi_datasets, output_location):
 
 #################################################################################
 
-def Export_Update_CDI_JSON(cdi_datasets, output_location):
+def Export_Update_CDI_JSON(cdi_datasets, output_location,today_quartered):
 	'''This function takes all of the CDI Dataset objects (updated)
 	and exports them as the full Updated JSON
 	'''
 
 	# Set Outfile parameters
 
-	output_path = os.path.join(output_location, 'updated_CDI_Masterlist.json')
+	output_path = os.path.join(output_location, 'updated_CDI_Masterlist_'+today_quartered+'.json')
 
 	# Convert objects into JSON
 	
@@ -88,12 +89,12 @@ def Export_Update_CDI_JSON(cdi_datasets, output_location):
 
 #################################################################################
 
-def Export_Time_Series_JSON(time_series_dictionary, output_location):
+def Export_Time_Series_JSON(time_series_dictionary, output_location,today_quartered):
 	'''This function exports a consistent metric json by creating a new or 
 	appending to the existing one
 	'''
 	
-	output_path = os.path.join(output_location, "CDI_Metrics.json")
+	output_path = os.path.join(output_location, 'CDI_Metrics_'+today_quartered+'.json')
 
 	try: # Will Try to add to existing Metric File
 
@@ -129,7 +130,7 @@ def Export_Time_Series_JSON(time_series_dictionary, output_location):
 
 #################################################################################
 
-def Export_Broken_JSON(broken_datasets, output_location):
+def Export_Broken_JSON(broken_datasets, output_location,today_quartered):
 	'''This function takes all of the Broken CDI Dataset objects
 	if there are any and outputs them.
 	'''
@@ -139,7 +140,7 @@ def Export_Broken_JSON(broken_datasets, output_location):
 
 	# Set Outfile parameters
 
-	output_path = os.path.join(output_location, 'broken_api_urls.json')
+	output_path = os.path.join(output_location, 'broken_api_urls_'+today_quartered+'.json')
 
 	# Convert objects into JSON
 	
@@ -160,12 +161,12 @@ def Export_Broken_JSON(broken_datasets, output_location):
 
 #################################################################################
 
-def export_list_of_dict_JSON(input_list_dict, output_location, filename):
+def export_list_of_dict_JSON(input_list_dict, output_location, filename, today_quartered):
 	'''This function takes any input list of dictionaries and outputs them into a 
 	JSON format with the provied output_location and filename
 	'''
-
-	output_path = os.path.join(output_location, filename)
+	
+	output_path = os.path.join(output_location, filename+today_quartered+'.json')
 
 	# Convert List of Dictionaries to JSON
 
@@ -181,5 +182,44 @@ def export_list_of_dict_JSON(input_list_dict, output_location, filename):
 
 #################################################################################
 
+def Export_Warnings_Summary_JSON(warnings_dictionary, output_location):
+	'''This function exports a warnings summary json by creating a new file or 
+	appending to the existing one
+	'''
+	
+	output_path = os.path.join(output_location, "Warnings_Summary.json")
 
+	try: # Will Try to add to existing Metric File
+
+		with open(output_path) as archive_file:
+			archive_json = json.load(archive_file)
+		
+		# Make sure the same time is only in the json once
+
+		for instance in archive_json:
+
+			if instance["Date"] == warnings_dictionary["Date"]:
+				return output_path
+			else:
+				continue
+
+		# Adds New to Archive and Writes Files
+
+		archive_json.append(warnings_dictionary)
+		output_json = json.dumps(archive_json, indent=4)
+
+		with open(output_path, 'w+') as writefile:
+			writefile.write(output_json)
+
+	
+	except: # Will create new metric file if it does not exist
+
+		output_json = json.dumps([warnings_dictionary], indent=4) # For Formatting
+
+		with open(output_path, 'w+') as writefile:
+			writefile.write(output_json)
+	
+	return output_path
+
+############################################################################################
 
