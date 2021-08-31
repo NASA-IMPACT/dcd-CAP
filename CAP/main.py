@@ -192,8 +192,7 @@ def main():
 	#### Export QA Updates ####
 
 
-	#qa_loc = Export_QA_Updates(updates, directory_dict[instance_dir])
-	qa_loc = export_list_of_dict_JSON(updates, directory_dict[instance_dir], "QA_Updates.json") # Pass in today_quartered
+	qa_loc = export_list_of_dict_JSON(updates, directory_dict[instance_dir], "QA_Updates", today_quartered)
 
 	print('Exported QA Updates Made: {}\n'.format(qa_loc))
 
