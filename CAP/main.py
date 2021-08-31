@@ -4,11 +4,13 @@ import json
 import datetime
 import os
 import argparse
+import pandas as pd
 
 from Code.cdi_class import CDI_Dataset
-from Code.cdi_validator import CDI_masterlist_QA, Export_QA_Updates, extra_data_gov, Export_Extra_CSV
+from Code.cdi_validator import CDI_masterlist_QA, Export_QA_Updates, extra_data_gov
 from Code.tag_validator import Climate_Tag_Check, Export_Retag_Request
-from Code.export_json import Export_Update_CDI_JSON, Export_Time_Series_JSON, Export_Broken_JSON, Export_Original_CDI_JSON, Export_Warnings_Summary_JSON
+from Code.export_json import Export_Update_CDI_JSON, Export_Time_Series_JSON, Export_Broken_JSON, Export_Original_CDI_JSON, export_list_of_dict_JSON, Export_Warnings_Summary_JSON
+
 
 
 #################################################################################
@@ -45,6 +47,19 @@ def interpret_time(today):
 	return(date+"_"+quarter)
 
 ##################################################################################
+def obj_to_df(obj):
+
+	list_of_datasets = [] # Initialize list of dataset dictionaries (or json)
+
+	for dataset in obj:
+
+		dataset_dict = dataset.export_dictionary() # Exports Dataset contents in dictionary
+
+		list_of_datasets.append(dataset_dict)
+
+	return(pd.DataFrame(list_of_datasets))
+
+##################################################################################
 
 def main():
 
@@ -54,7 +69,8 @@ def main():
 
 	today = datetime.datetime.today()
 	today_quartered=interpret_time(today)
-	print("\nCDI Integrity Scripts\n\nDate: {}\n\n\n".format(interpret_time(today)))
+	print("\nCDI Integrity Scripts\n\nDate: {}\n\n\n".format(today_quartered))
+
 
 
 	#### Define Directories ####
@@ -62,7 +78,7 @@ def main():
 	current_working_dir = os.getcwd()
 
 	# Create Directories
-	instance_dir = 'Output/{}'.format(interpret_time(today))
+	instance_dir = 'Output/{}'.format(today_quartered)
 
 
 
@@ -117,7 +133,7 @@ def main():
 		print('\r\tPercentage Complete: {}%'.format(percentage), end="")
   	
 	# Export Original JSON
-	og_json_loc = Export_Original_CDI_JSON(cdi_datasets, directory_dict[instance_dir])
+	og_json_loc = Export_Original_CDI_JSON(cdi_datasets, directory_dict[instance_dir], today_quartered)
 	print('\n\nExported Original CDI JSON: {}\n'.format(og_json_loc))
 
 
@@ -168,41 +184,43 @@ def main():
 	#### Check for Datasets in CC, not in Masterlist ####
 
 	print('Checking for Datasets in the Data.gov Climate Collection\nthat are not in the CDI Master List....\n\n')
-	extra_dict = extra_data_gov(masterlist_json)
+	extras, climate_collection = extra_data_gov(masterlist_json)
 
 	############################################
 
 	#### Export QA Updates ####
 
-	qa_loc = Export_QA_Updates(updates, directory_dict[instance_dir])
+	qa_loc = Export_QA_Updates(updates, directory_dict[instance_dir],today_quartered)
 	print('Exported QA Updates Made: {}\n'.format(qa_loc))
 
 	
 	#### Export Retag Request ####
 
-	retag_loc = Export_Retag_Request(notags, directory_dict[instance_dir])
+	retag_loc = Export_Retag_Request(notags, directory_dict[instance_dir],today_quartered)
 	print('Exported Retag Request: {}\n'.format(retag_loc))
 	
 
 	#### Export Updated JSON ####
 
-	json_loc = Export_Update_CDI_JSON(cdi_datasets, directory_dict[instance_dir])
+	json_loc = Export_Update_CDI_JSON(cdi_datasets, directory_dict[instance_dir],today_quartered)
 	print('Exported Updated CDI JSON: {}\n'.format(json_loc))
 
 	#### Export Broken Datasets ####
 
-	broken_loc = Export_Broken_JSON(broken_datasets, directory_dict[instance_dir])
+	broken_loc = Export_Broken_JSON(broken_datasets, directory_dict[instance_dir],today_quartered)
 	print('Exported Updated CDI JSON: {}\n'.format(broken_loc))
 
 	#### Export Extra CDI Datasets ####
-	extra_loc = Export_Extra_CSV(extra_dict, directory_dict[instance_dir])
+	extra_loc = export_list_of_dict_JSON(extras, directory_dict[instance_dir], 'data_gov_not_master_', today_quartered)
 	print('Exported CSV of datasets not in the masterlist but on data.gov: {}\n'.format(extra_loc))
 
 	#### Exporting Time Series Metrics ####
 
 	date = today.strftime("%m/%d/%Y %I:%M %p")
-	ml_count = len(cdi_datasets) # Only Including Working API links
-	cc_count = ml_count - len(notags) # Difference between notag list and ml = # in Climate Collection
+	
+	cdi_datasets_df=obj_to_df(cdi_datasets)
+	ml_count = len(cdi_datasets_df[cdi_datasets_df['is_active']=="True"])# Only Including Working API links
+	cc_count = len(climate_collection) # from data.gov Climate Collection
 
 	timeseries_dict = {
 						"Date":date,
@@ -210,7 +228,7 @@ def main():
 						"Climate_Collection_Count":cc_count
 	}
 	
-	timeseries_loc = Export_Time_Series_JSON(timeseries_dict, directory_dict["Output"])
+	timeseries_loc = Export_Time_Series_JSON(timeseries_dict, directory_dict["Output"],today_quartered)
 	print('Exported CDI Metrics: {}\n'.format(timeseries_loc))
 
 	### Export Warnings Summary Master File ###

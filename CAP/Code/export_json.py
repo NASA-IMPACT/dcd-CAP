@@ -3,14 +3,14 @@ import json
 
 #################################################################################
 
-def Export_Original_CDI_JSON(cdi_datasets, output_location):
+def Export_Original_CDI_JSON(cdi_datasets, output_location,today_quartered):
 	'''This function takes all of the CDI Dataset objects (original)
 	and exports them as the full Original JSON
 	'''
 
 	# Set Outfile parameters
 
-	output_path = os.path.join(output_location, 'original_CDI_Masterlist.json')
+	output_path = os.path.join(output_location, 'original_CDI_Masterlist_'+today_quartered+'.json')
 
 	# Convert objects into JSON
 	
@@ -32,14 +32,14 @@ def Export_Original_CDI_JSON(cdi_datasets, output_location):
 
 #################################################################################
 
-def Export_Update_CDI_JSON(cdi_datasets, output_location):
+def Export_Update_CDI_JSON(cdi_datasets, output_location,today_quartered):
 	'''This function takes all of the CDI Dataset objects (updated)
 	and exports them as the full Updated JSON
 	'''
 
 	# Set Outfile parameters
 
-	output_path = os.path.join(output_location, 'updated_CDI_Masterlist.json')
+	output_path = os.path.join(output_location, 'updated_CDI_Masterlist_'+today_quartered+'.json')
 
 	# Convert objects into JSON
 	
@@ -60,12 +60,12 @@ def Export_Update_CDI_JSON(cdi_datasets, output_location):
 
 #################################################################################
 
-def Export_Time_Series_JSON(time_series_dictionary, output_location):
+def Export_Time_Series_JSON(time_series_dictionary, output_location,today_quartered):
 	'''This function exports a consistent metric json by creating a new or 
 	appending to the existing one
 	'''
 	
-	output_path = os.path.join(output_location, "CDI_Metrics.json")
+	output_path = os.path.join(output_location, 'CDI_Metrics_'+today_quartered+'.json')
 
 	try: # Will Try to add to existing Metric File
 
@@ -101,7 +101,7 @@ def Export_Time_Series_JSON(time_series_dictionary, output_location):
 
 #################################################################################
 
-def Export_Broken_JSON(broken_datasets, output_location):
+def Export_Broken_JSON(broken_datasets, output_location,today_quartered):
 	'''This function takes all of the Broken CDI Dataset objects
 	if there are any and outputs them.
 	'''
@@ -111,7 +111,7 @@ def Export_Broken_JSON(broken_datasets, output_location):
 
 	# Set Outfile parameters
 
-	output_path = os.path.join(output_location, 'broken_api_urls.json')
+	output_path = os.path.join(output_location, 'broken_api_urls_'+today_quartered+'.json')
 
 	# Convert objects into JSON
 	
@@ -132,12 +132,12 @@ def Export_Broken_JSON(broken_datasets, output_location):
 
 #################################################################################
 
-def export_list_of_dict_JSON(input_list_dict, output_location, filename):
+def export_list_of_dict_JSON(input_list_dict, output_location, filename, today_quartered):
 	'''This function takes any input list of dictionaries and outputs them into a 
 	JSON format with the provied output_location and filename
 	'''
-
-	output_path = os.path.join(output_location, filename)
+	
+	output_path = os.path.join(output_location, filename+today_quartered+'.json')
 
 	# Convert List of Dictionaries to JSON
 
