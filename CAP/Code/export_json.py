@@ -3,6 +3,35 @@ import json
 
 #################################################################################
 
+def Export_Object_to_JSON(cdi_datasets, output_location, filename):
+	'''This function takes all of the CDI Dataset objects (original)
+	and exports them as the full Original JSON
+	'''
+
+	# Set Outfile parameters
+
+	output_path = os.path.join(output_location, filename)
+
+	# Convert objects into JSON
+	
+	list_of_datasets = [] # Initialize list of dataset dictionaries (or json)
+
+	for dataset in cdi_datasets:
+
+		dataset_dict = dataset.export_dictionary() # Exports Dataset contents in dictionary
+
+		list_of_datasets.append(dataset_dict)
+
+	output_json = json.dumps(list_of_datasets, indent=4)
+
+	with open(output_path, 'w+') as outfile:
+		outfile.write(output_json)
+
+	return output_path
+
+#################################################################################
+
+
 def Export_Original_CDI_JSON(cdi_datasets, output_location,today_quartered):
 	'''This function takes all of the CDI Dataset objects (original)
 	and exports them as the full Original JSON

@@ -20,7 +20,7 @@ def CDI_masterlist_QA(cdi_dataset):
 	api_json = cdi_dataset.full_api_json
 
 	# Crossreference the CKAN API for dataset and check/update masterlist values
-	name_cat_change = check_name_and_update_caturl(cdi_dataset, api_json)
+	name_change, catalog_change = check_name_and_update_caturl(cdi_dataset, api_json)
 	title_change = check_title(cdi_dataset, api_json)
 	org_change = check_organization(cdi_dataset, api_json)
 	metadata_type_change = check_metadata_type(cdi_dataset, api_json)
@@ -32,27 +32,43 @@ def CDI_masterlist_QA(cdi_dataset):
 	datagov_id_change = check_datagov_id(cdi_dataset)
 
 	# Compile the updates made and return them as a dictionary
-	if name_cat_change:
-		name_change = name_cat_change[0]
-		catalog_url_change = name_cat_change[1]
+	change_dict["cdi_id"] = cdi_dataset.cdi_id
+	change_dict['name'] = invalid_updated_todict(name_change) # Index 0 correlates to Name
+	change_dict['title'] = invalid_updated_todict(title_change)
+	change_dict['organization'] = invalid_updated_todict(org_change)
+	change_dict['catalog_url'] = invalid_updated_todict(catalog_change) # Index 1 correlates to cat url
+	change_dict['metadata_type'] = invalid_updated_todict(metadata_type_change)
+	change_dict['datagov_id'] = invalid_updated_todict(datagov_id_change)
 
-		change_dict['name'] = name_change
-		change_dict['catalog_url'] = catalog_url_change
+	# Use below code to only return if the dictionary has updates
+	 
+	# Return dictionary IF there are values
+	change_list = [name_change, catalog_change, title_change, org_change, metadata_type_change, datagov_id_change]
 
-	if title_change:
-		change_dict['title'] = title_change
+	for item in change_list:
+		if item != None:
+			return change_dict
 
-	if org_change:
-		change_dict['organization'] = org_change
+	return None
+	
 
-	if metadata_type_change:
-		change_dict['metadata_type'] = metadata_type_change
+#################################################################################
 
-	if datagov_id_change:
-		change_dict['datagov_id'] = datagov_id_change
+def invalid_updated_todict(listof_invalid_updated):
+	'''This function takes a list of two lengths, and returns a dictionary
+	of those two notated as Invalid and Updated respectively'''
 
+	if listof_invalid_updated == None:
+		return ''
 
-	return change_dict
+	before, after = listof_invalid_updated
+
+	invalid_updates_dict = {
+							"Invalid":before,
+							"Updated":after
+							}
+
+	return invalid_updates_dict
 
 #################################################################################
 def extra_data_gov(masterlist_json):
@@ -87,45 +103,5 @@ def extra_data_gov(masterlist_json):
 	extra_list_of_dictionaries= [value for value in dictionary.values()]
 	
 	return extra_list_of_dictionaries, climate_collection
-
-
-#################################################################################
-
-def Export_QA_Updates(update_dict, output_location, today_quartered):
-	'''This function takes the compiled dictionary of QA Updates and
-	outputs them to a readable text file
-	'''
-
-	# Output File Parameters
-
-	today = datetime.datetime.today().strftime("%m/%d/%Y %I:%M %p")
-
-	output_path = os.path.join(output_location, 'QA_Updates_'+today_quartered+'.txt'.format(today))
-
-	# Open Output Document
-	output_doc = open(output_path, 'w+')
-	output_doc.write('CDI Masterlist QA Export\n\nUpdated: {}\n\n\n'.format(today))
-
-	# Loop through updated_records write the "Before" and "After" to text file
-	for updated_record in update_dict.items():
-		ur_cdi_id = updated_record[0] # First item in tuple is cdi id
-		ur_dict = updated_record[1] # Second item in tuple is dictionary containing all updates
-
-		output_doc.write('CDI_ID: {}\n\n'.format(ur_cdi_id))
-
-		for key in ur_dict.keys():
-			output_doc.write('{}\n'.format(key))
-			before, after = ur_dict[key] # Splits list into 2
-
-			output_doc.write('\tInvalid: {}\n'.format(before))
-			output_doc.write('\tUpdated: {}\n\n'.format(after))
-
-		output_doc.write('\n\n\n')
-
-
-	output_doc.close()
-
-	return output_path
-
 
 #################################################################################

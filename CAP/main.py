@@ -7,9 +7,10 @@ import argparse
 import pandas as pd
 
 from Code.cdi_class import CDI_Dataset
-from Code.cdi_validator import CDI_masterlist_QA, Export_QA_Updates, extra_data_gov
+from Code.cdi_validator import CDI_masterlist_QA, extra_data_gov
 from Code.tag_validator import Climate_Tag_Check, Export_Retag_Request
-from Code.export_json import Export_Update_CDI_JSON, Export_Time_Series_JSON, Export_Broken_JSON, Export_Original_CDI_JSON, export_list_of_dict_JSON, Export_Warnings_Summary_JSON
+from Code.export_json import Export_Update_CDI_JSON, Export_Time_Series_JSON, Export_Broken_JSON, Export_Original_CDI_JSON, export_list_of_dict_JSON, Export_Warnings_Summary_JSON, Export_Object_to_JSON
+
 
 
 
@@ -70,7 +71,6 @@ def main():
 	today = datetime.datetime.today()
 	today_quartered=interpret_time(today)
 	print("\nCDI Integrity Scripts\n\nDate: {}\n\n\n".format(today_quartered))
-
 
 
 	#### Define Directories ####
@@ -141,14 +141,14 @@ def main():
 
 	print("Starting CDI Masterlist QA Check")
 
-	updates = {} #Initiatlize dictionary of updates (Uses CDI_ID as key)
+	updates = []
 
 	for cdi_dataset in cdi_datasets:
 
 		an_update = CDI_masterlist_QA(cdi_dataset)
 
 		if an_update: # Empty Dictionary = False Bool
-			updates[cdi_dataset.cdi_id] = an_update # Creates dictionary entry with CDI_ID of dataset as key)
+			updates.append(an_update)
 
 		# Standard Output
 		number = cdi_datasets.index(cdi_dataset) + 1
@@ -187,14 +187,25 @@ def main():
 	extras, climate_collection = extra_data_gov(masterlist_json)
 
 	############################################
+	################# EXPORTS ##################
 
 	#### Export QA Updates ####
 
-	qa_loc = Export_QA_Updates(updates, directory_dict[instance_dir],today_quartered)
+
+	#qa_loc = Export_QA_Updates(updates, directory_dict[instance_dir])
+	qa_loc = export_list_of_dict_JSON(updates, directory_dict[instance_dir], "QA_Updates.json") # Pass in today_quartered
+
 	print('Exported QA Updates Made: {}\n'.format(qa_loc))
 
+	#### Export Retag Dataset ####
+
+	retag_filename = 'retag_{}.json'.format(today_quartered)
+	retag_loc = Export_Object_to_JSON(notags, directory_dict[instance_dir], retag_filename)
+	print('Export Retag Datasets: {}\n'.format(retag_loc))
+
 	
-	#### Export Retag Request ####
+	#### Export Retag Request Excel ####
+
 
 	retag_loc = Export_Retag_Request(notags, directory_dict[instance_dir],today_quartered)
 	print('Exported Retag Request: {}\n'.format(retag_loc))

@@ -33,7 +33,7 @@ def check_name_and_update_caturl(cdi_dataset, api_json):
 	
 
 	if cdi_name == api_name:
-		return None
+		return [None, None] # Necessary since success requires multiple assignment
 	else:
 		cdi_dataset.update_name(api_name) # Updates Name Value
 
