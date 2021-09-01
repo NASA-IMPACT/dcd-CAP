@@ -15,14 +15,31 @@ All the Functions in this section are in relation to the cdi_validator.py CDI_ma
 #################################################################################
 
 def url_checker(url):
-	status=requests.get(url).status_code
-	if status==200:
-		working=True
+	'''This function checks and url for its current status
+	'''
+	status = requests.get(url).status_code
+	if status == 200:
+		working = True
 	else:
-		working=False
+		working = False
 
 	return working
 
+#################################################################################
+
+def check_catalog_url_status(cdi_dataset, catalog_change_list):
+
+	# Check Catalog_Url Status
+	cat_url = cdi_dataset.catalog_url
+	url_status = url_checker(cat_url)
+
+	if url_status == True:
+		return catalog_change_list
+	else:
+		cdi_dataset.update_catalog_url("broken")
+		return [cat_url,"broken"]
+
+#################################################################################
 
 def check_name_and_update_caturl(cdi_dataset, api_json):
 
@@ -38,10 +55,6 @@ def check_name_and_update_caturl(cdi_dataset, api_json):
 		cdi_dataset.update_name(api_name) # Updates Name Value
 
 		new_caturl = 'https://catalog.data.gov/dataset/{}'.format(api_name) # Creates new Catalog URL
-
-		working=url_checker(new_caturl)
-		if working == False:
-			new_caturl="broken"
 
 		cdi_dataset.update_catalog_url(new_caturl) # Updates Catalog URL Value
 

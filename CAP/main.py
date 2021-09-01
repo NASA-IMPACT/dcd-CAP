@@ -149,11 +149,12 @@ def main():
 
 		if an_update: # Empty Dictionary = False Bool
 			updates.append(an_update)
-
+		
 		# Standard Output
 		number = cdi_datasets.index(cdi_dataset) + 1
 		percentage = round(number/len(cdi_datasets) * 100, 2)
 		print('\r\tPercentage Complete: {}%'.format(percentage), end="")
+
 
 	print()		
 	print('\tQA Check Complete\n\n')
@@ -222,7 +223,7 @@ def main():
 
 	#### Export Extra CDI Datasets ####
 	extra_loc = export_list_of_dict_JSON(extras, directory_dict[instance_dir], 'data_gov_not_master_', today_quartered)
-	print('Exported CSV of datasets not in the masterlist but on data.gov: {}\n'.format(extra_loc))
+	print('Exported json of datasets not in the masterlist but on data.gov: {}\n'.format(extra_loc))
 
 	#### Exporting Time Series Metrics ####
 
