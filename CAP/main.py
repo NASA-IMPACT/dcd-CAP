@@ -233,7 +233,7 @@ def main():
 	cc_count = len(climate_collection) # from data.gov Climate Collection
 
 	timeseries_dict = {
-						"Date":date,
+						"Date":today_quartered,
 						"Masterlist_Count":ml_count,
 						"Climate_Collection_Count":cc_count
 	}
