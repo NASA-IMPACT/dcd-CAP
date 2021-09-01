@@ -9,7 +9,7 @@ from Code.cdi_checks import *
 
 #################################################################################
 
-def CDI_masterlist_QA(cdi_dataset):
+def CDI_Masterlist_QA(cdi_dataset):
 	'''This Function uses the various checks in cdi_checks.py to validate 
 	the CDI Masterlist attributes against the data.gov API
 	'''
@@ -20,26 +20,26 @@ def CDI_masterlist_QA(cdi_dataset):
 	api_json = cdi_dataset.full_api_json
 
 	# Crossreference the CKAN API for dataset and check/update masterlist values
-	name_change, catalog_change = check_name_and_update_caturl(cdi_dataset, api_json)
-	catalog_change = check_catalog_url_status(cdi_dataset, catalog_change)
-	title_change = check_title(cdi_dataset, api_json)
-	org_change = check_organization(cdi_dataset, api_json)
-	metadata_type_change = check_metadata_type(cdi_dataset, api_json)
+	name_change, catalog_change = Check_Name_and_Update_Caturl(cdi_dataset, api_json)
+	catalog_change = Check_Catalog_URL_Status(cdi_dataset, catalog_change)
+	title_change = Check_Title(cdi_dataset, api_json)
+	org_change = Check_Organization(cdi_dataset, api_json)
+	metadata_type_change = Check_Organization(cdi_dataset, api_json)
 
 	# Check for Climate Tag and gives True/False value for cdi_dataset.climate_tag
-	check_climate_tag(cdi_dataset, api_json)
+	Check_Climate_Tag(cdi_dataset, api_json)
 
 	# Check datagov_id against api_url
-	datagov_id_change = check_datagov_id(cdi_dataset)
+	datagov_id_change = Check_Datagov_ID(cdi_dataset)
 
 	# Compile the updates made and return them as a dictionary
 	change_dict["cdi_id"] = cdi_dataset.cdi_id
-	change_dict['name'] = invalid_updated_todict(name_change) # Index 0 correlates to Name
-	change_dict['title'] = invalid_updated_todict(title_change)
-	change_dict['organization'] = invalid_updated_todict(org_change)
-	change_dict['catalog_url'] = invalid_updated_todict(catalog_change) # Index 1 correlates to cat url
-	change_dict['metadata_type'] = invalid_updated_todict(metadata_type_change)
-	change_dict['datagov_id'] = invalid_updated_todict(datagov_id_change)
+	change_dict['name'] = Invalid_Updated_toDict(name_change) # Index 0 correlates to Name
+	change_dict['title'] = Invalid_Updated_toDict(title_change)
+	change_dict['organization'] = Invalid_Updated_toDict(org_change)
+	change_dict['catalog_url'] = Invalid_Updated_toDict(catalog_change) # Index 1 correlates to cat url
+	change_dict['metadata_type'] = Invalid_Updated_toDict(metadata_type_change)
+	change_dict['datagov_id'] = Invalid_Updated_toDict(datagov_id_change)
 
 	# Use below code to only return if the dictionary has updates
 	 
@@ -55,7 +55,7 @@ def CDI_masterlist_QA(cdi_dataset):
 
 #################################################################################
 
-def invalid_updated_todict(listof_invalid_updated):
+def Invalid_Updated_toDict(listof_invalid_updated):
 	'''This function takes a list of two lengths, and returns a dictionary
 	of those two notated as Invalid and Updated respectively'''
 
@@ -72,7 +72,7 @@ def invalid_updated_todict(listof_invalid_updated):
 	return invalid_updates_dict
 
 #################################################################################
-def extra_data_gov(masterlist_json):
+def Extra_Data_Gov(masterlist_json):
 	''' This function checks all the datasets in the data.gov climate group 
 	against the data gov ids in the masterlist to identify mislabeled data. '''
 

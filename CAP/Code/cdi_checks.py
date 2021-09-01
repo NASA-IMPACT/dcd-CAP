@@ -17,7 +17,7 @@ All the Functions in this section are in relation to the cdi_validator.py CDI_ma
 
 #################################################################################
 
-def url_checker(url):
+def URL_Checker(url):
 	'''This function checks and url for its current status
 	'''
 	try:
@@ -34,11 +34,11 @@ def url_checker(url):
 
 #################################################################################
 
-def check_catalog_url_status(cdi_dataset, catalog_change_list):
+def Check_Catalog_URL_Status(cdi_dataset, catalog_change_list):
 
 	# Check Catalog_Url Status
 	cat_url = cdi_dataset.catalog_url
-	url_status = url_checker(cat_url)
+	url_status = URL_Checker(cat_url)
 
 	if url_status == True:
 		return catalog_change_list
@@ -48,7 +48,7 @@ def check_catalog_url_status(cdi_dataset, catalog_change_list):
 
 #################################################################################
 
-def check_name_and_update_caturl(cdi_dataset, api_json):
+def Check_Name_and_Update_Caturl(cdi_dataset, api_json):
 
 	# Check name & update caturl if name change
 	api_name = api_json['result']['name']
@@ -69,7 +69,7 @@ def check_name_and_update_caturl(cdi_dataset, api_json):
 
 #################################################################################
 
-def check_title(cdi_dataset, api_json):
+def Check_Title(cdi_dataset, api_json):
 
 	# Check title
 	api_title = api_json['result']['title']
@@ -84,7 +84,7 @@ def check_title(cdi_dataset, api_json):
 
 #################################################################################
 
-def check_organization(cdi_dataset, api_json):
+def Check_Organization(cdi_dataset, api_json):
 	#Check organization
 	api_org = api_json['result']['organization']['name']
 	cdi_org = cdi_dataset.organization
@@ -98,7 +98,7 @@ def check_organization(cdi_dataset, api_json):
 
 #################################################################################
 
-def check_metadata_type(cdi_dataset, api_json):
+def Check_Metadata_Type(cdi_dataset, api_json):
 	api_extras = api_json['result']['extras']
 	cdi_metadata_type = cdi_dataset.metadata_type
 	found_key = False
@@ -120,7 +120,7 @@ def check_metadata_type(cdi_dataset, api_json):
 
 #################################################################################
 
-def check_datagov_id(cdi_dataset):
+def Check_Datagov_ID(cdi_dataset):
 	api_url = cdi_dataset.api_url
 	datagov_id = cdi_dataset.datagov_ID
 	
@@ -135,7 +135,7 @@ def check_datagov_id(cdi_dataset):
 
 #################################################################################
 
-def check_climate_tag(cdi_dataset, api_json):
+def Check_Climate_Tag(cdi_dataset, api_json):
 	# Check Tag
 
 	if not api_json['result']['groups'] or not any(d['name']=='climate5434' for d in api_json['result']['groups']):

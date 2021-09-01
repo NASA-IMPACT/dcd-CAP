@@ -7,7 +7,7 @@ import argparse
 import pandas as pd
 
 from Code.cdi_class import CDI_Dataset
-from Code.cdi_validator import CDI_masterlist_QA, extra_data_gov
+from Code.cdi_validator import CDI_Masterlist_QA, Extra_Data_Gov
 from Code.tag_validator import Climate_Tag_Check, Export_Retag_Request
 from Code.export_json import Export_Object_to_JSON, Export_Time_Series_JSON, Export_List_of_Dict_JSON, Export_Warnings_Summary_JSON
 
@@ -29,7 +29,7 @@ def getparser():
 
 def interpret_time(today):
 	hour = today.strftime("%H")
-	date = (today.strftime("%Y_%m_%d"))
+	date = today.strftime("%Y_%m_%d")
 
 	quarter1 = ['03','04','05','06','07','08']
 	quarter2 = ['09','10','11','12','13','14']
@@ -133,7 +133,7 @@ def main():
 
 	for cdi_dataset in cdi_datasets:
 
-		an_update = CDI_masterlist_QA(cdi_dataset)
+		an_update = CDI_Masterlist_QA(cdi_dataset)
 
 		if an_update: # Empty Dictionary = False Bool
 			updates.append(an_update)
@@ -173,7 +173,7 @@ def main():
 	#### Check for Datasets in CC, not in Masterlist ####
 
 	print('Checking for Datasets in the Data.gov Climate Collection\nthat are not in the CDI Master List....\n\n')
-	extras, climate_collection = extra_data_gov(masterlist_json)
+	extras, climate_collection = Extra_Data_Gov(masterlist_json)
 
 	############################################
 	################# EXPORTS ##################
@@ -218,14 +218,15 @@ def main():
 
 	#### Exporting Time Series Metrics ####
 
-	date = today.strftime("%m/%d/%Y %I:%M %p")
 	'''
-	cdi_datasets_df = obj_to_df(all_datasets)
-	ml_count = len(cdi_datasets_df[cdi_datasets_df['is_active']=="True"])# Only Including Working API links
-
 	Come back to this way of counting Active Masterlist - 
 	Currently we are not updating the is_active attribute in the masterlist
+
+	cdi_datasets_df = obj_to_df(all_datasets)
+	ml_count = len(cdi_datasets_df[cdi_datasets_df['is_active']=="True"])# Only Including Working API links
 	'''
+
+	date = today.strftime("%m/%d/%Y %I:%M %p")
 	ml_count = len(cdi_datasets) # List of objects which do not have broken API urls
 	cc_count = len(climate_collection) # from data.gov Climate Collection
 
@@ -257,12 +258,14 @@ def main():
 
 #################################################################################
 
-def create_directories(main_dir, directoryies_list):
-
+def create_directories(main_dir, directories_list):
+	'''This function creates the directories based on the input 
+	directory list
+	'''
 
 	directories = {}
 
-	for dr in directoryies_list:
+	for dr in directories_list:
 		path = os.path.join(main_dir, dr)
 		try:
 			os.mkdir(path)
@@ -275,7 +278,10 @@ def create_directories(main_dir, directoryies_list):
 
 #################################################################################
 
-def obj_to_df(obj):
+def obj_to_df(cdi_datasets):
+	'''This function creates a panda dataframe from an input list
+	of CDI Objects
+	'''
 
 	list_of_datasets = [] # Initialize list of dataset dictionaries (or json)
 
@@ -285,7 +291,9 @@ def obj_to_df(obj):
 
 		list_of_datasets.append(dataset_dict)
 
-	return(pd.DataFrame(list_of_datasets))
+	cdi_df = pd.DataFrame(list_of_datasets)
+
+	return(cdi_df)
 
 #################################################################################
 
