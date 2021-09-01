@@ -1,5 +1,6 @@
 import os
 import requests
+
 #################################################################################
 
 '''
@@ -24,8 +25,8 @@ def url_checker(url):
 			working = True
 		else:
 			working = False
-	except:
-		working = True
+	except requests.ConnectionError as e:
+		working = False
 
 	return working
 
