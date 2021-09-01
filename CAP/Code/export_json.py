@@ -3,10 +3,15 @@ import json
 
 #################################################################################
 
-def Export_Object_to_JSON(cdi_datasets, output_location, filename):
+def Export_Object_to_JSON(cdi_datasets, output_location, filename, broken=False):
 	'''This function takes all of the CDI Dataset objects (original)
 	and exports them as the full Original JSON
 	'''
+
+	# Check Optional Parameters
+	if broken:
+		if len(cdi_datasets) == 0:
+			return "No Broken Datasets Found"
 
 	# Set Outfile parameters
 
@@ -31,65 +36,7 @@ def Export_Object_to_JSON(cdi_datasets, output_location, filename):
 
 #################################################################################
 
-
-def Export_Original_CDI_JSON(cdi_datasets, output_location,today_quartered):
-	'''This function takes all of the CDI Dataset objects (original)
-	and exports them as the full Original JSON
-	'''
-
-	# Set Outfile parameters
-
-	output_path = os.path.join(output_location, 'original_CDI_Masterlist_'+today_quartered+'.json')
-
-	# Convert objects into JSON
-	
-	list_of_datasets = [] # Initialize list of dataset dictionaries (or json)
-
-	for dataset in cdi_datasets:
-
-		dataset_dict = dataset.export_dictionary() # Exports Dataset contents in dictionary
-
-		list_of_datasets.append(dataset_dict)
-
-	output_json = json.dumps(list_of_datasets, indent=4)
-
-	with open(output_path, 'w+') as outfile:
-		outfile.write(output_json)
-
-	return output_path
-
-
-#################################################################################
-
-def Export_Update_CDI_JSON(cdi_datasets, output_location,today_quartered):
-	'''This function takes all of the CDI Dataset objects (updated)
-	and exports them as the full Updated JSON
-	'''
-
-	# Set Outfile parameters
-
-	output_path = os.path.join(output_location, 'updated_CDI_Masterlist_'+today_quartered+'.json')
-
-	# Convert objects into JSON
-	
-	list_of_datasets = [] # Initialize list of dataset dictionaries (or json)
-
-	for dataset in cdi_datasets:
-
-		dataset_dict = dataset.export_dictionary() # Exports Dataset contents in dictionary
-
-		list_of_datasets.append(dataset_dict)
-
-	output_json = json.dumps(list_of_datasets, indent=4)
-
-	with open(output_path, 'w+') as outfile:
-		outfile.write(output_json)
-
-	return output_path
-
-#################################################################################
-
-def Export_Time_Series_JSON(time_series_dictionary, output_location,):
+def Export_Time_Series_JSON(time_series_dictionary, output_location):
 	'''This function exports a consistent metric json by creating a new or 
 	appending to the existing one
 	'''
@@ -128,45 +75,15 @@ def Export_Time_Series_JSON(time_series_dictionary, output_location,):
 	
 	return output_path
 
-#################################################################################
-
-def Export_Broken_JSON(broken_datasets, output_location,today_quartered):
-	'''This function takes all of the Broken CDI Dataset objects
-	if there are any and outputs them.
-	'''
-
-	if len(broken_datasets) == 0:
-		return "No Broken Datasets Found"
-
-	# Set Outfile parameters
-
-	output_path = os.path.join(output_location, 'broken_api_urls_'+today_quartered+'.json')
-
-	# Convert objects into JSON
-	
-	list_of_datasets = [] # Initialize list of dataset dictionaries (or json)
-
-	for dataset in broken_datasets:
-
-		dataset_dict = dataset.export_dictionary() # Exports Dataset contents in dictionary
-
-		list_of_datasets.append(dataset_dict)
-
-	output_json = json.dumps(list_of_datasets, indent=4)
-
-	with open(output_path, 'w+') as outfile:
-		outfile.write(output_json)
-
-	return output_path
 
 #################################################################################
 
-def export_list_of_dict_JSON(input_list_dict, output_location, filename, today_quartered):
+def Export_List_of_Dict_JSON(input_list_dict, output_location, filename):
 	'''This function takes any input list of dictionaries and outputs them into a 
 	JSON format with the provied output_location and filename
 	'''
 	
-	output_path = os.path.join(output_location, filename+today_quartered+'.json')
+	output_path = os.path.join(output_location, filename)
 
 	# Convert List of Dictionaries to JSON
 

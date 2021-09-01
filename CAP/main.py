@@ -9,7 +9,7 @@ import pandas as pd
 from Code.cdi_class import CDI_Dataset
 from Code.cdi_validator import CDI_masterlist_QA, extra_data_gov
 from Code.tag_validator import Climate_Tag_Check, Export_Retag_Request
-from Code.export_json import Export_Update_CDI_JSON, Export_Time_Series_JSON, Export_Broken_JSON, Export_Original_CDI_JSON, export_list_of_dict_JSON, Export_Warnings_Summary_JSON, Export_Object_to_JSON
+from Code.export_json import Export_Object_to_JSON, Export_Time_Series_JSON, Export_List_of_Dict_JSON, Export_Warnings_Summary_JSON
 
 
 
@@ -135,7 +135,9 @@ def main():
 		print('\r\tPercentage Complete: {}%'.format(percentage), end="")
   	
 	# Export Original JSON
-	og_json_loc = Export_Original_CDI_JSON(all_datasets, directory_dict[instance_dir], today_quartered)
+
+	og_json_filename = 'original_CDI_Masterlist_{}.json'.format(today_quartered)
+	og_json_loc = Export_Object_to_JSON(all_datasets, directory_dict[instance_dir], og_json_filename)
 	print('\n\nExported Original CDI JSON: {}\n'.format(og_json_loc))
 
 
@@ -194,9 +196,8 @@ def main():
 
 	#### Export QA Updates ####
 
-
-	qa_loc = export_list_of_dict_JSON(updates, directory_dict[instance_dir], "QA_Updates", today_quartered)
-
+	qa_filename = 'QA_Updates_{}.json'.format(today_quartered)
+	qa_loc = Export_List_of_Dict_JSON(updates, directory_dict[instance_dir], qa_filename)
 	print('Exported QA Updates Made: {}\n'.format(qa_loc))
 
 	#### Export Retag Dataset ####
@@ -208,23 +209,27 @@ def main():
 	
 	#### Export Retag Request Excel ####
 
-
-	retag_loc = Export_Retag_Request(notags, directory_dict[instance_dir],today_quartered)
+	retag_req_filename = 'retag_request_{}.xlsx'.format(today_quartered)
+	retag_loc = Export_Retag_Request(notags, directory_dict[instance_dir],retag_req_filename)
 	print('Exported Retag Request: {}\n'.format(retag_loc))
 	
 
 	#### Export Updated JSON ####
 
-	json_loc = Export_Update_CDI_JSON(cdi_datasets, directory_dict[instance_dir],today_quartered)
+	updated_json_filename = 'updated_CDI_Masterlist_{}.json'.format(today_quartered)
+	json_loc = Export_Object_to_JSON(cdi_datasets, directory_dict[instance_dir], updated_json_filename)
 	print('Exported Updated CDI JSON: {}\n'.format(json_loc))
 
 	#### Export Broken Datasets ####
 
-	broken_loc = Export_Broken_JSON(broken_datasets, directory_dict[instance_dir],today_quartered)
+	broken_filename = 'broken_api_urls_{}.json'.format(today_quartered)
+	broken_loc = Export_Object_to_JSON(broken_datasets, directory_dict[instance_dir], broken_filename, broken=True)
 	print('Exported Updated CDI JSON: {}\n'.format(broken_loc))
 
-	#### Export Extra CDI Datasets ####
-	extra_loc = export_list_of_dict_JSON(extras, directory_dict[instance_dir], 'data_gov_not_master_', today_quartered)
+	#### Export Extra CDI Datasets #### FIXX
+
+	extra_filename = 'data_gov_not_master_{}.json'.format(today_quartered)
+	extra_loc = Export_List_of_Dict_JSON(extras, directory_dict[instance_dir], extra_filename)
 	print('Exported json of datasets not in the masterlist but on data.gov: {}\n'.format(extra_loc))
 
 	#### Exporting Time Series Metrics ####
