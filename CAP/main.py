@@ -244,14 +244,14 @@ def main():
 	### Export Warnings Summary Master File ###
 	
 	date = today.strftime("%m/%d/%Y %I:%M %p")
-	total_warnings = len(broken_datasets) + len(notags) + len(extra_dict)
+	total_warnings = len(broken_datasets) + len(notags) + len(extras)
 
 	warnings_dict = {
-						"Date": date,
+						"Date": today_quartered,
 						"Total Warnings": total_warnings,
 						"Broken URLs Count": len(broken_datasets),
 						"Lost Climate Tag Count": len(notags),
-						"Not in Masterlist Count": len(extra_dict)
+						"Not in Masterlist Count": len(extras)
 	}
 	
 	warnings_loc = Export_Warnings_Summary_JSON(warnings_dict, directory_dict["Output"])
