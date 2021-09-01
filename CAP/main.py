@@ -11,9 +11,6 @@ from Code.cdi_validator import CDI_masterlist_QA, extra_data_gov
 from Code.tag_validator import Climate_Tag_Check, Export_Retag_Request
 from Code.export_json import Export_Object_to_JSON, Export_Time_Series_JSON, Export_List_of_Dict_JSON, Export_Warnings_Summary_JSON
 
-
-
-
 #################################################################################
 
 def getparser():
@@ -31,34 +28,24 @@ def getparser():
 #################################################################################
 
 def interpret_time(today):
-	hour=today.strftime("%H")
-	date=(today.strftime("%Y_%m_%d"))
-	quarter1=['03','04','05','06','07','08']
-	quarter2=['09','10','11','12','13','14']
-	quarter3=['15','16','17','18','19','20']
-	quarter4=['21','22','23','24','01','02']
+	hour = today.strftime("%H")
+	date = (today.strftime("%Y_%m_%d"))
+
+	quarter1 = ['03','04','05','06','07','08']
+	quarter2 = ['09','10','11','12','13','14']
+	quarter3 = ['15','16','17','18','19','20']
+	quarter4 = ['21','22','23','24','01','02']
+
 	if hour in quarter1:
-		quarter='1'
+		quarter = '1'
 	elif hour in quarter2:
-		quarter='2'	
+		quarter = '2'	
 	elif hour in quarter3:
-		quarter='3'	
+		quarter = '3'	
 	elif hour in quarter4:
-		quarter='4'	
-	return(date+"_"+quarter)
+		quarter = '4'
 
-##################################################################################
-def obj_to_df(obj):
-
-	list_of_datasets = [] # Initialize list of dataset dictionaries (or json)
-
-	for dataset in obj:
-
-		dataset_dict = dataset.export_dictionary() # Exports Dataset contents in dictionary
-
-		list_of_datasets.append(dataset_dict)
-
-	return(pd.DataFrame(list_of_datasets))
+	return('{}_{}'.format(date,quarter))
 
 ##################################################################################
 
@@ -69,7 +56,7 @@ def main():
 	args = parser.parse_args()
 
 	today = datetime.datetime.today()
-	today_quartered = '2021_09_01_1'#interpret_time(today)
+	today_quartered = interpret_time(today)
 	print("\nCDI Integrity Scripts\n\nDate: {}\n\n\n".format(today_quartered))
 
 
@@ -232,9 +219,14 @@ def main():
 	#### Exporting Time Series Metrics ####
 
 	date = today.strftime("%m/%d/%Y %I:%M %p")
-	
-	cdi_datasets_df=obj_to_df(cdi_datasets)
+	'''
+	cdi_datasets_df = obj_to_df(all_datasets)
 	ml_count = len(cdi_datasets_df[cdi_datasets_df['is_active']=="True"])# Only Including Working API links
+
+	Come back to this way of counting Active Masterlist - 
+	Currently we are not updating the is_active attribute in the masterlist
+	'''
+	ml_count = len(cdi_datasets) # List of objects which do not have broken API urls
 	cc_count = len(climate_collection) # from data.gov Climate Collection
 
 	timeseries_dict = {
@@ -283,6 +275,19 @@ def create_directories(main_dir, directoryies_list):
 
 #################################################################################
 
+def obj_to_df(obj):
+
+	list_of_datasets = [] # Initialize list of dataset dictionaries (or json)
+
+	for dataset in obj:
+
+		dataset_dict = dataset.export_dictionary() # Exports Dataset contents in dictionary
+
+		list_of_datasets.append(dataset_dict)
+
+	return(pd.DataFrame(list_of_datasets))
+
+#################################################################################
 
 
 

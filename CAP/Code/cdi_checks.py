@@ -5,6 +5,8 @@ import requests
 
 '''
 All the Functions in this section are in relation to the cdi_validator.py CDI_masterlist_QA function
+- url_checker
+- check_catalog_url_status
 - check_name_and_update_caturl
 - check_title
 - check_organization
