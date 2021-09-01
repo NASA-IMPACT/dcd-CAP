@@ -57,7 +57,7 @@ def main():
 
 	today = datetime.datetime.today()
 	today_quartered = interpret_time(today)
-	print("\nCDI Integrity Scripts\n\nDate: {}\n\n\n".format(today_quartered))
+	print("\nCDI Integrity Scripts\n\nDate: {}".format(today_quartered))
 
 
 	#### Define Directories ####
@@ -81,6 +81,18 @@ def main():
 		# Ingest from Live Github Repo (https://github.com/NASA-IMPACT/cdi_master/blob/master/cdi_master_update_2020.json)
 		github_response = urllib.request.urlopen(r'https://raw.githubusercontent.com/NASA-IMPACT/cdi_master/master/cdi_master_update_2020.json')
 		masterlist_json = json.load(github_response)
+	
+
+	### Export Original JSON ###
+	og_json_filename = 'Original_CDI_Masterlist_{}.json'.format(today_quartered)
+	og_output_path = os.path.join(directory_dict['Output/OriginalMasterlist'], og_json_filename)
+	og_output_json = json.dumps(masterlist_json, indent=4)
+
+	with open(og_output_path, 'w+') as og_outfile:
+		og_outfile.write(og_output_json)
+
+	print('\n\nExported Original CDI JSON: {}\n'.format(og_output_path))
+
 
 
 	#### Initialize list and add Dataset Objects ####
@@ -117,16 +129,12 @@ def main():
 		number = masterlist_json.index(ds_json) + 1
 		percentage = round(number/len(masterlist_json) * 100, 2)
 		print('\r\tPercentage Complete: {}%'.format(percentage), end="")
-  	
-	# Export Original JSON
 
-	og_json_filename = 'Original_CDI_Masterlist_{}.json'.format(today_quartered)
-	og_json_loc = Export_Object_to_JSON(all_datasets, directory_dict['Output/OriginalMasterlist'], og_json_filename)
-	print('\n\nExported Original CDI JSON: {}\n'.format(og_json_loc))
-
+	print()		
+	print('\tIngest Complete\n\n')
 
 	#### Start QA Analysis of CDI Masterlist ####
-
+	
 	print("Starting CDI Masterlist QA Check")
 
 	updates = []
@@ -179,39 +187,36 @@ def main():
 	################# EXPORTS ##################
 
 	#### Export QA Updates ####
-
 	qa_filename = 'QA_Updates_{}.json'.format(today_quartered)
 	qa_loc = Export_List_of_Dict_JSON(updates, directory_dict['Output/QAUpdates'], qa_filename)
 	print('Exported QA Updates Made: {}\n'.format(qa_loc))
 
-	#### Export Retag Dataset ####
 
+	#### Export Retag Dataset ####
 	retag_filename = 'Retag_{}.json'.format(today_quartered)
 	retag_loc = Export_Object_to_JSON(notags, directory_dict['Output/Retag'], retag_filename)
 	print('Export Retag Datasets: {}\n'.format(retag_loc))
 
 	
 	#### Export Retag Request Excel ####
-
 	retag_req_filename = 'Retag_Request_{}.xlsx'.format(today_quartered)
 	retag_loc = Export_Retag_Request(notags, directory_dict['Output/RetagRequests'],retag_req_filename)
 	print('Exported Retag Request: {}\n'.format(retag_loc))
 	
 
 	#### Export Updated JSON ####
-
 	updated_json_filename = 'Updated_CDI_Masterlist_{}.json'.format(today_quartered)
 	json_loc = Export_Object_to_JSON(cdi_datasets, directory_dict['Output/UpdatedMasterlist'], updated_json_filename)
 	print('Exported Updated CDI JSON: {}\n'.format(json_loc))
 
-	#### Export Broken Datasets ####
 
+	#### Export Broken Datasets ####
 	broken_filename = 'Broken_API_URLs_{}.json'.format(today_quartered)
 	broken_loc = Export_Object_to_JSON(broken_datasets, directory_dict['Output/BrokenAPI'], broken_filename, broken=True)
 	print('Exported Updated CDI JSON: {}\n'.format(broken_loc))
 
-	#### Export Extra CDI Datasets #### FIXX
 
+	#### Export Extra CDI Datasets #### FIXX
 	extra_filename = 'Not_in_Masterlist_{}.json'.format(today_quartered)
 	extra_loc = Export_List_of_Dict_JSON(extras, directory_dict['Output/NotInMasterlist'], extra_filename)
 	print('Exported json of datasets not in the masterlist but on data.gov: {}\n'.format(extra_loc))
