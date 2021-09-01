@@ -17,11 +17,15 @@ All the Functions in this section are in relation to the cdi_validator.py CDI_ma
 def url_checker(url):
 	'''This function checks and url for its current status
 	'''
-	status = requests.get(url).status_code
-	if status == 200:
+	try:
+		status = requests.get(url).status_code
+
+		if status == 200:
+			working = True
+		else:
+			working = False
+	except:
 		working = True
-	else:
-		working = False
 
 	return working
 
