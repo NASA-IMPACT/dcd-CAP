@@ -101,6 +101,7 @@ def main():
 
 	#### Initialize list and add Dataset Objects ####
 
+	all_datasets = []
 	cdi_datasets = []
 	broken_datasets = []
 	count = 1 # Initializes Count of Datasets for CDI_ID Renumbering
@@ -111,6 +112,7 @@ def main():
 
 		# Create Dataset Object
 		dataset = CDI_Dataset(ds_json)
+		all_datasets.append(dataset)
 
 
 		# API URL and JSON is broken, add to broken list
@@ -133,7 +135,7 @@ def main():
 		print('\r\tPercentage Complete: {}%'.format(percentage), end="")
   	
 	# Export Original JSON
-	og_json_loc = Export_Original_CDI_JSON(cdi_datasets, directory_dict[instance_dir], today_quartered)
+	og_json_loc = Export_Original_CDI_JSON(all_datasets, directory_dict[instance_dir], today_quartered)
 	print('\n\nExported Original CDI JSON: {}\n'.format(og_json_loc))
 
 
