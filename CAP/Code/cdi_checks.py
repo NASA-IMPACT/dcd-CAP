@@ -5,14 +5,14 @@ import requests
 
 '''
 All the Functions in this section are in relation to the cdi_validator.py CDI_masterlist_QA function
-- url_checker
-- check_catalog_url_status
-- check_name_and_update_caturl
-- check_title
-- check_organization
-- check_metadata_type
-- check_climate_tag
-- check_cdi_themes (Not Currently Needed)
+- URL_Checker
+- Check_Catalog_URL_Status
+- Check_Name_and_Update_Caturl
+- Check_Title
+- Check_Organization
+- Check_Metadata_Type
+- Check_Climate_Tag
+- Check_CDI_Themes (Not Currently Needed)
 '''
 
 #################################################################################
@@ -159,7 +159,7 @@ def Check_Climate_Tag(cdi_dataset, api_json):
 #################################################################################
 # Not Currently Needed
 '''
-def check_cdi_themes(cdi_dataset, api_json):
+def Check_CDI_Themes(cdi_dataset, api_json):
 	api_extras = api_json['result']['extras']
 
 	for i in range(len(api_extras)):

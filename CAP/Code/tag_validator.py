@@ -58,8 +58,10 @@ def Export_Retag_Request(cdi_datasets, output_location, filename):
 		dataset_dict = notag_dataset.export_dictionary() # Exports Dataset contents in dictionary
 
 		# Filter/Recreate OutputJson for desired output
-		filter_dict = {'id':dataset_dict['datagov_ID'], 'Dataset Name': dataset_dict['name'],
-		'Data.gov URL':dataset_dict['catalog_url'], 'CDI Theme':dataset_dict['cdi_themes']}
+		filter_dict = {'id':dataset_dict['datagov_ID'], 
+						'Dataset Name': dataset_dict['name'],
+						'Data.gov URL':dataset_dict['catalog_url'], 
+						'CDI Theme':dataset_dict['cdi_themes']}
 
 		output_json.append(filter_dict)
 
