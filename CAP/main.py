@@ -238,7 +238,7 @@ def main():
 						"Climate_Collection_Count":cc_count
 	}
 	
-	timeseries_loc = Export_Time_Series_JSON(timeseries_dict, directory_dict["Output"],today_quartered)
+	timeseries_loc = Export_Time_Series_JSON(timeseries_dict, directory_dict["Output"])
 	print('Exported CDI Metrics: {}\n'.format(timeseries_loc))
 
 	### Export Warnings Summary Master File ###
