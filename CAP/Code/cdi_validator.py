@@ -3,12 +3,13 @@ import requests
 import json
 import datetime
 import os
+import pandas as pd
 
 from Code.cdi_checks import *
 
 #################################################################################
 
-def CDI_masterlist_QA(cdi_dataset):
+def CDI_Masterlist_QA(cdi_dataset):
 	'''This Function uses the various checks in cdi_checks.py to validate 
 	the CDI Masterlist attributes against the data.gov API
 	'''
@@ -19,72 +20,89 @@ def CDI_masterlist_QA(cdi_dataset):
 	api_json = cdi_dataset.full_api_json
 
 	# Crossreference the CKAN API for dataset and check/update masterlist values
-	name_cat_change = check_name_and_update_caturl(cdi_dataset, api_json)
-	title_change = check_title(cdi_dataset, api_json)
-	org_change = check_organization(cdi_dataset, api_json)
-	metadata_type_change = check_metadata_type(cdi_dataset, api_json)
+	name_change, catalog_change = Check_Name_and_Update_Caturl(cdi_dataset, api_json)
+	catalog_change = Check_Catalog_URL_Status(cdi_dataset, catalog_change)
+	title_change = Check_Title(cdi_dataset, api_json)
+	org_change = Check_Organization(cdi_dataset, api_json)
+	metadata_type_change = Check_Organization(cdi_dataset, api_json)
 
 	# Check for Climate Tag and gives True/False value for cdi_dataset.climate_tag
-	check_climate_tag(cdi_dataset, api_json)
+	Check_Climate_Tag(cdi_dataset, api_json)
+
+	# Check datagov_id against api_url
+	datagov_id_change = Check_Datagov_ID(cdi_dataset)
 
 	# Compile the updates made and return them as a dictionary
-	if name_cat_change:
-		name_change = name_cat_change[0]
-		catalog_url_change = name_cat_change[1]
+	change_dict["cdi_id"] = cdi_dataset.cdi_id
+	change_dict['name'] = Invalid_Updated_toDict(name_change) # Index 0 correlates to Name
+	change_dict['title'] = Invalid_Updated_toDict(title_change)
+	change_dict['organization'] = Invalid_Updated_toDict(org_change)
+	change_dict['catalog_url'] = Invalid_Updated_toDict(catalog_change) # Index 1 correlates to cat url
+	change_dict['metadata_type'] = Invalid_Updated_toDict(metadata_type_change)
+	change_dict['datagov_id'] = Invalid_Updated_toDict(datagov_id_change)
 
-		change_dict['name'] = name_change
-		change_dict['catalog_url'] = catalog_url_change
+	# Use below code to only return if the dictionary has updates
+	 
+	# Return dictionary IF there are values
+	change_list = [name_change, catalog_change, title_change, org_change, metadata_type_change, datagov_id_change]
 
-	if title_change:
-		change_dict['title'] = title_change
+	for item in change_list:
+		if item != None:
+			return change_dict
 
-	if org_change:
-		change_dict['organization'] = org_change
-
-	if metadata_type_change:
-		change_dict['metadata_type'] = metadata_type_change
-
-
-	return change_dict
+	return None
+	
 
 #################################################################################
 
+def Invalid_Updated_toDict(listof_invalid_updated):
+	'''This function takes a list of two lengths, and returns a dictionary
+	of those two notated as Invalid and Updated respectively'''
 
-def Export_QA_Updates(update_dict, output_location):
-	'''This function takes the compiled dictionary of QA Updates and
-	outputs them to a readable text file
-	'''
+	if listof_invalid_updated == None:
+		return ''
 
-	# Output File Parameters
+	before, after = listof_invalid_updated
 
-	today = datetime.datetime.today().strftime("%m/%d/%Y %I:%M %p")
+	invalid_updates_dict = {
+							"Invalid":before,
+							"Updated":after
+							}
 
-	output_path = os.path.join(output_location, 'CDI_QA.txt'.format(today))
+	return invalid_updates_dict
 
-	# Open Output Document
-	output_doc = open(output_path, 'w+')
-	output_doc.write('CDI Masterlist QA Export\n\nUpdated: {}\n\n\n'.format(today))
+#################################################################################
+def Extra_Data_Gov(masterlist_json):
+	''' This function checks all the datasets in the data.gov climate group 
+	against the data gov ids in the masterlist to identify mislabeled data. '''
 
-	# Loop through updated_records write the "Before" and "After" to text file
-	for updated_record in update_dict.items():
-		ur_cdi_id = updated_record[0] # First item in tuple is cdi id
-		ur_dict = updated_record[1] # Second item in tuple is dictionary containing all updates
+	not_in_master_full = pd.DataFrame({}) # Create empty dataframe
 
-		output_doc.write('CDI_ID: {}\n\n'.format(ur_cdi_id))
+	# Call Full Climate Collection (CC) API
+	api_call = requests.get('https://catalog.data.gov/api/3/action/package_search?fq=groups:climate5434&rows=2000').json()
+	data_gov_id_df = (pd.json_normalize(api_call['result']['results'])) # Create a Dataframe of all Data.gov IDs in Data.gov CC
+	climate_collection=data_gov_id_df
+	# Set up list of all CDI Masterlist IDs
+	masterlist_id_list = (pd.json_normalize(masterlist_json)['datagov_ID']).tolist()
+	data_gov_id_df['API'] = ''
+	data_gov_id_df['Catalog'] = ''
 
-		for key in ur_dict.keys():
-			output_doc.write('{}\n'.format(key))
-			before, after = ur_dict[key] # Splits list into 2
+	# Loop through Climate Collection DataFrame
+	for index,row in data_gov_id_df.iterrows():
 
-			output_doc.write('\tInvalid: {}\n'.format(before))
-			output_doc.write('\tUpdated: {}\n\n'.format(after))
+		# Crossreference with CDI Masterlist (ML) and if not in ML, record dataset attributes
+		if row['id'] in masterlist_id_list:
+			pass
+		else:
+			row['API'] = 'https://catalog.data.gov/api/3/action/package_show?id={}'.format(row['id'])
+			row['Catalog'] = 'https://catalog.data.gov/dataset/{}'.format(row['name'])
+			not_in_master_full = not_in_master_full.append(row)
 
-		output_doc.write('\n\n\n')
-
-
-	output_doc.close()
-
-	return output_path
-
+	# Reformat Output Dataframe and convert to Dictionary
+	formatted_df = pd.DataFrame({'Title':not_in_master_full['title'],'Name':not_in_master_full['name'],'API':not_in_master_full['API'],'Catalog':not_in_master_full['Catalog']})
+	dictionary = formatted_df.to_dict('index')
+	extra_list_of_dictionaries= [value for value in dictionary.values()]
+	
+	return extra_list_of_dictionaries, climate_collection
 
 #################################################################################

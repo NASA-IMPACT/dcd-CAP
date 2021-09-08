@@ -1,9 +1,14 @@
 # Code Directories to Ignore on Push
 CAP/Code/__pycache__/
+CAP/__pycache__/
 Output/
 
 # Any Environment Files Built
 .env/*
+./.env/*
+
+env/*
+./env/*
 
 # Mac 
 .DS_Store

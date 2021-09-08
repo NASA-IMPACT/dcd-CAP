@@ -68,6 +68,7 @@ class CDI_Dataset:
 
 
 	def export_dictionary(self):
+		'''This method exports the cdi_object into a dictionary (json)'''
 
 		dataset_dict = {}
 

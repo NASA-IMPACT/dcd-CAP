@@ -18,7 +18,7 @@ def Climate_Tag_Check(cdi_dataset):
 
 #################################################################################
 
-def format_retag_request_excel(path_to_document):
+def Format_Retag_Request_Excel(path_to_document):
 	'''This function formats the created excel file by: 
 	Adjusting column width and applying "Wrap Text" styling
 	'''
@@ -42,14 +42,14 @@ def format_retag_request_excel(path_to_document):
 
 #################################################################################
 
-def Export_Retag_Request(cdi_datasets, output_location):
+def Export_Retag_Request(cdi_datasets, output_location, filename):
 	'''This function takes the cdi objects that do not have the climate tag and
 	outputs them to an excel file
 	'''
 	
 	# Set Outfile parameters
 
-	output_path = os.path.join(output_location, 'retag_request.xlsx')
+	output_path = os.path.join(output_location, filename)
 
 	output_json = [] # Initialize list of dataset dictionaries (or json)
 
@@ -58,8 +58,10 @@ def Export_Retag_Request(cdi_datasets, output_location):
 		dataset_dict = notag_dataset.export_dictionary() # Exports Dataset contents in dictionary
 
 		# Filter/Recreate OutputJson for desired output
-		filter_dict = {'id':dataset_dict['datagov_ID'], 'Dataset Name': dataset_dict['name'],
-		'Data.gov URL':dataset_dict['catalog_url'], 'CDI Theme':dataset_dict['cdi_themes']}
+		filter_dict = {'id':dataset_dict['datagov_ID'], 
+						'Dataset Name': dataset_dict['name'],
+						'Data.gov URL':dataset_dict['catalog_url'], 
+						'CDI Theme':dataset_dict['cdi_themes']}
 
 		output_json.append(filter_dict)
 
@@ -73,7 +75,7 @@ def Export_Retag_Request(cdi_datasets, output_location):
 
 	writer.save()
 
-	format_retag_request_excel(output_path)
+	Format_Retag_Request_Excel(output_path)
 
 	return output_path
 
