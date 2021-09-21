@@ -6,10 +6,17 @@ import os
 import argparse
 import pandas as pd
 
-from Code.cdi_class import CDI_Dataset
-from Code.cdi_validator import CDI_Masterlist_QA, Extra_Data_Gov
-from Code.tag_validator import Climate_Tag_Check, Export_Retag_Request
-from Code.export_json import Export_Object_to_JSON, Export_Time_Series_JSON, Export_List_of_Dict_JSON, Export_Warnings_Summary_JSON
+
+if __name__ == '__main__':
+    from Code.cdi_class import CDI_Dataset
+    from Code.cdi_validator import CDI_Masterlist_QA, Extra_Data_Gov
+    from Code.tag_validator import Climate_Tag_Check, Export_Retag_Request
+    from Code.export_json import Export_Object_to_JSON, Export_Time_Series_JSON, Export_List_of_Dict_JSON, Export_Warnings_Summary_JSON
+else:
+    from .Code.cdi_class import CDI_Dataset
+    from .Code.cdi_validator import CDI_Masterlist_QA, Extra_Data_Gov
+    from .Code.tag_validator import Climate_Tag_Check, Export_Retag_Request
+    from .Code.export_json import Export_Object_to_JSON, Export_Time_Series_JSON, Export_List_of_Dict_JSON, Export_Warnings_Summary_JSON
 
 #################################################################################
 
@@ -48,7 +55,7 @@ def interpret_time(today):
 	return('{}_{}'.format(date,quarter))
 
 ##################################################################################
-
+    
 def main():
 
 	# Get Command Arguments

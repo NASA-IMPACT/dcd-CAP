@@ -5,7 +5,7 @@ import datetime
 import os
 import pandas as pd
 
-from Code.cdi_checks import *
+from .cdi_checks import *
 
 #################################################################################
 
