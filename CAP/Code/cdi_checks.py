@@ -132,30 +132,6 @@ def Check_Datagov_ID(cdi_dataset):
 		cdi_dataset.update_datagov_ID(api_url_id)
 		return [datagov_id, api_url_id]
 
-
-#################################################################################
-
-def Check_Climate_Tag(cdi_dataset, api_json):
-	# Check Tag
-
-	if not api_json['result']['groups'] or not any(d['name']=='climate5434' for d in api_json['result']['groups']):
-		cdi_dataset.update_climate_tag_status(False)
-	else:
-		cdi_dataset.update_climate_tag_status(True)
-
-	'''
-	api_groups = api_json['result']['groups']
-
-	for i in range(len(api_groups)):
-		api_group_name = api_groups[i]['name']
-
-		if api_group_name == 'climate5434':
-			cdi_dataset.update_climate_tag_status(True)
-			return
-
-	cdi_dataset.update_climate_tag_status(False)
-	'''
-
 #################################################################################
 # Not Currently Needed
 '''

@@ -26,9 +26,6 @@ def CDI_Masterlist_QA(cdi_dataset):
 	org_change = Check_Organization(cdi_dataset, api_json)
 	metadata_type_change = Check_Organization(cdi_dataset, api_json)
 
-	# Check for Climate Tag and gives True/False value for cdi_dataset.climate_tag
-	Check_Climate_Tag(cdi_dataset, api_json)
-
 	# Check datagov_id against api_url
 	datagov_id_change = Check_Datagov_ID(cdi_dataset)
 
