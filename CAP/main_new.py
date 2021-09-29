@@ -21,13 +21,17 @@ else:
 
 
 class CAP():
+    '''
+    Takes a Climate Collection Masterlist and Creates a Maintenance Instance with multiple
+    checking methods
+    '''
+
     def __init__(self, master_list):
         if master_list:
             self.master_list = master_list
         else:
             raise Exception("Please provide a master list")
 
-        interpret_time()
 
     def interpret_time(self):
         today = datetime.datetime.today()
@@ -66,10 +70,9 @@ class CAP():
         pass
 
     def not_in_masterlist_check(self):
-        '''Method should use Main.py lines 188-192 and self.masterlist instance variable run the Not in masterlist check
+        '''Method should use Main.py lines 188-192 and self.masterlist instance variable to run the Not in masterlist check
         Method should create two instance variables self.extras and self.climate_collection and return self.extras'''
         pass
-
 
     def create_cdi_metrics(self):
         '''Method should use the instance variables self.cdi_datasets and self.climate_collection to create the self.cdi_metrics
@@ -83,7 +86,7 @@ class CAP():
         '''
         pass
 
-    def export(self):
+    def export_all(self):
         # return a dictionary with all required metrics
         return
     
