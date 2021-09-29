@@ -26,14 +26,21 @@ class CAP():
     checking methods
     '''
 
-    def __init__(self, master_list):
-        if master_list:
-            self.master_list = master_list
+    def __init__(self, cdi_masterlist):
+        '''Masterlist should be input in json format
+        '''
+        if cdi_masterlist:
+            self.cdi_masterlist = cdi_masterlist
         else:
             raise Exception("Please provide a master list")
 
+        self.interpret_time()
+
 
     def interpret_time(self):
+        '''
+        '''
+
         today = datetime.datetime.today()
         hour = today.strftime("%H")
         date = today.strftime("%Y_%m_%d")
@@ -55,24 +62,69 @@ class CAP():
         self.date_instance = ('{}_{}'.format(date,quarter))
 
     def ingest_datasets(self):
-        '''Method should use Main.py lines 105-142 to ingest the self.masterlist as Dataset Objects
-        Method should create an instance variables self.cdi_datasets and self.broken_datasets'''
-        pass
+        '''This method ingests the CDI masterlist as CDI Dataset Objects and Checks
+        for Broken API Links
+        '''
+        #### Initialize list and add Dataset Objects ####
+
+        cdi_datasets = []
+        broken_datasets = []
+        count = 1 # Initializes Count of Datasets for CDI_ID Renumbering
+
+        masterlist_json = self.cdi_masterlist
+
+        for ds_json in masterlist_json:
+
+            # Create Dataset Object
+            dataset = CDI_Dataset(ds_json)
+
+            # API URL and JSON is broken, add to broken list
+            if dataset.full_api_json == "Broken":
+                broken_datasets.append(dataset)
+                continue
+
+            # Renumber CDI_ID
+
+            dataset.update_cdi_id(count)
+            count += 1
+
+
+            # Add dataset to list of dataset objects
+            cdi_datasets.append(dataset)
+
+        self.cdi_datasets = cdi_datasets
+        self.broken_datasets = broken_datasets
 
     def run_qa(self):
         '''Method should use Main.py lines 143-165 and the self.cdi_datasets instance variable to run the QA Checks
         Method should create an instance variable self.updates and return self.updates'''
-        pass
+
+        #### Start QA Analysis of CDI Masterlist ####
+        
+        updates = []
+
+        cdi_datasets = self.cdi_datasets
+
+        for cdi_dataset in cdi_datasets:
+
+            an_update = CDI_Masterlist_QA(cdi_dataset)
+
+            if an_update: # Empty Dictionary = False Bool
+                updates.append(an_update)
+
+        self.updates = updates
+
+        return self.updates
 
     def climate_tag_check(self):
         '''Method should use Main.py lines 167-187 and self.cdi_datasets instance variable to run the Climate Tag Check
         Method should create an instance variable self.notags and return self.notags'''
-        pass
+        self.notags = []
 
     def not_in_masterlist_check(self):
         '''Method should use Main.py lines 188-192 and self.masterlist instance variable to run the Not in masterlist check
         Method should create two instance variables self.extras and self.climate_collection and return self.extras'''
-        pass
+        self.extras = []
 
     def create_cdi_metrics(self):
         '''Method should use the instance variables self.cdi_datasets and self.climate_collection to create the self.cdi_metrics
@@ -84,10 +136,29 @@ class CAP():
     def create_warnings_summary(self):
         '''Method should use the relavent instance variables to create the self.warnings_summary instance variable and return it
         '''
-        pass
+        ### Export Warnings Summary ###
+        
+        date = self.date_instance
+        broken_datasets = self.broken_datasets
+        notags = self.notags
+        extras = self.extras
+
+        total_warnings = len(broken_datasets) + len(notags) + len(extras)
+
+        warnings_dict = {
+                            "Date": date,
+                            "Total Warnings": total_warnings,
+                            "Broken URLs Count": len(broken_datasets),
+                            "Lost Climate Tag Count": len(notags),
+                            "Not in Masterlist Count": len(extras)
+        }
+
+        self.warnings_summary = warnings_dict
+
+        return self.warnings_summary
 
     def export_all(self):
         # return a dictionary with all required metrics
-        return
+        return 
     
 
