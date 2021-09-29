@@ -27,7 +27,7 @@ class CAP():
     '''
 
     def __init__(self, cdi_masterlist):
-        '''Masterlist should be input in json format
+        ''' Masterlist should be input in json format
         '''
         if cdi_masterlist:
             self.cdi_masterlist = cdi_masterlist
@@ -38,7 +38,7 @@ class CAP():
 
 
     def interpret_time(self):
-        '''
+        ''' This method interprets the quarter time that the instance was run
         '''
 
         today = datetime.datetime.today()
@@ -96,8 +96,8 @@ class CAP():
         self.broken_datasets = broken_datasets
 
     def run_qa(self):
-        '''Method should use Main.py lines 143-165 and the self.cdi_datasets instance variable to run the QA Checks
-        Method should create an instance variable self.updates and return self.updates'''
+        '''This method uses self.cdi_datasets to run QA on the CDI Masterlist Datasets
+        '''
 
         #### Start QA Analysis of CDI Masterlist ####
         
@@ -122,16 +122,25 @@ class CAP():
         self.notags = []
 
     def not_in_masterlist_check(self):
-        '''Method should use Main.py lines 188-192 and self.masterlist instance variable to run the Not in masterlist check
-        Method should create two instance variables self.extras and self.climate_collection and return self.extras'''
-        self.extras = []
+        '''This method interprets which datasets are in the Climate Collection that are not in the CDI
+        Masterlist, as well as create the self.climate_collection instance variable which is a dataframe of
+        the Climate Collection'''
+
+        masterlist_json = self.cdi_masterlist
+
+        extras, climate_collection = Extra_Data_Gov(masterlist_json)
+
+        self.extras = extras
+        self.climate_collection = climate_collection
+
+        return self.extras
 
     def create_cdi_metrics(self):
         '''Method should use the instance variables self.cdi_datasets and self.climate_collection to create the self.cdi_metrics
         instance variable and return it'''
         
-        ml_count = len(CDI_Today.cdi_datasets)
-        cc_count = len(CDI_Today.climate_collection)
+        ml_count = len(self.cdi_datasets)
+        cc_count = len(self.climate_collection)
 
     def create_warnings_summary(self):
         '''Method should use the relavent instance variables to create the self.warnings_summary instance variable and return it
