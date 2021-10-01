@@ -119,7 +119,23 @@ class CAP():
     def climate_tag_check(self):
         '''Method should use Main.py lines 167-187 and self.cdi_datasets instance variable to run the Climate Tag Check
         Method should create an instance variable self.notags and return self.notags'''
-        self.notags = []
+
+        cdi_datasets = self.cdi_datasets
+
+        notags = [] #Initialize list of notag datasets
+
+        for cdi_dataset in cdi_datasets:
+
+            notag = Climate_Tag_Check(cdi_dataset)
+
+            if notag:
+                notags.append(notag)
+
+        self.notags = notags
+
+        return self.notags
+
+            
 
     def not_in_masterlist_check(self):
         '''This method interprets which datasets are in the Climate Collection that are not in the CDI
@@ -138,9 +154,20 @@ class CAP():
     def create_cdi_metrics(self):
         '''Method should use the instance variables self.cdi_datasets and self.climate_collection to create the self.cdi_metrics
         instance variable and return it'''
-        
+
+        date = self.date_instance
         ml_count = len(self.cdi_datasets)
         cc_count = len(self.climate_collection)
+
+        cdi_metrics_dict = {
+                            "Date": date,
+                            "CDI Masterlist Count": ml_count,
+                            "Climate Collection Count": cc_count
+        }
+
+        self.cdi_metrics = cdi_metrics_dict
+
+        return self.cdi_metrics
 
     def create_warnings_summary(self):
         '''Method should use the relavent instance variables to create the self.warnings_summary instance variable and return it
