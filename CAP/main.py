@@ -114,7 +114,7 @@ def main():
 	for ds_json in masterlist_json:
 
 		# Create Dataset Object
-		dataset = CDI_Dataset(ds_json)
+		dataset = CDI_Dataset(ds_json, today_quartered)
 		all_datasets.append(dataset)
 
 
