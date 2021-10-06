@@ -3,7 +3,7 @@ import json
 
 #################################################################################
 
-def Export_Object_to_JSON(cdi_datasets, output_location, filename, broken=False):
+def Export_Object_to_JSON(cdi_datasets, output_location=False, filename=False, broken=False):
 	'''This function takes all of the CDI Dataset objects (original)
 	and exports them as the full Original JSON
 	'''
@@ -12,10 +12,6 @@ def Export_Object_to_JSON(cdi_datasets, output_location, filename, broken=False)
 	if broken:
 		if len(cdi_datasets) == 0:
 			return "No Broken Datasets Found"
-
-	# Set Outfile parameters
-
-	output_path = os.path.join(output_location, filename)
 
 	# Convert objects into JSON
 	
@@ -29,10 +25,16 @@ def Export_Object_to_JSON(cdi_datasets, output_location, filename, broken=False)
 
 	output_json = json.dumps(list_of_datasets, indent=4)
 
-	with open(output_path, 'w+') as outfile:
-		outfile.write(output_json)
+	if output_location:
+		# Set Outfile parameters
+		output_path = os.path.join(output_location, filename)
 
-	return output_path
+		with open(output_path, 'w+') as outfile:
+			outfile.write(output_json)
+
+		return output_path
+
+	return output_json
 
 #################################################################################
 

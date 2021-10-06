@@ -31,11 +31,11 @@ class CAP():
         '''
         if cdi_masterlist:
             self.cdi_masterlist = cdi_masterlist
+            self.original_masterlist = cdi_masterlist
         else:
             raise Exception("Please provide a master list")
 
         self.interpret_time()
-
 
     def interpret_time(self):
         ''' This method interprets the quarter time that the instance was run
@@ -93,7 +93,7 @@ class CAP():
             cdi_datasets.append(dataset)
 
         self.cdi_datasets = cdi_datasets
-        self.broken_datasets = broken_datasets
+        self.broken_datasets = Export_Object_to_JSON(broken_datasets)
 
     def run_qa(self):
         '''This method uses self.cdi_datasets to run QA on the CDI Masterlist Datasets
@@ -117,8 +117,7 @@ class CAP():
         return self.updates
 
     def climate_tag_check(self):
-        '''Method should use Main.py lines 167-187 and self.cdi_datasets instance variable to run the Climate Tag Check
-        Method should create an instance variable self.notags and return self.notags'''
+        '''This method interprets the CDI Datasets and checks for it's climate tag in the CKAN API'''
 
         cdi_datasets = self.cdi_datasets
 
@@ -131,12 +130,11 @@ class CAP():
             if notag:
                 notags.append(notag)
 
-        self.notags = notags
+        self.notags = Export_Object_to_JSON(notags)
 
         return self.notags
 
             
-
     def not_in_masterlist_check(self):
         '''This method interprets which datasets are in the Climate Collection that are not in the CDI
         Masterlist, as well as create the self.climate_collection instance variable which is a dataframe of
@@ -152,8 +150,7 @@ class CAP():
         return self.extras
 
     def create_cdi_metrics(self):
-        '''Method should use the instance variables self.cdi_datasets and self.climate_collection to create the self.cdi_metrics
-        instance variable and return it'''
+        '''This method exports the CDI Metrics of the instance including Climate Count and Masterlist Count'''
 
         date = self.date_instance
         ml_count = len(self.cdi_datasets)
@@ -170,7 +167,7 @@ class CAP():
         return self.cdi_metrics
 
     def create_warnings_summary(self):
-        '''Method should use the relavent instance variables to create the self.warnings_summary instance variable and return it
+        '''This Method returns a dictionary of a CDI Warnings Summary Metrics
         '''
         ### Export Warnings Summary ###
         
@@ -195,6 +192,30 @@ class CAP():
 
     def export_all(self):
         # return a dictionary with all required metrics
-        return 
+
+        all_metrics = {
+
+                        "CDI Metrics": self.cdi_metrics,
+                        "Warnings Summary": self.warnings_summary,
+                        "Updated Masterlist": self.cdi_datasets,
+                        "Original Masterlist": self.original_masterlist,
+                        "Retag Datasets": self.notags,
+                        "Broken API": self.broken_datasets,
+                        "QA Updates": self.updates,
+                        "Not in Masterlist": self.extras
+
+        }
+
+        return all_metrics
+
+
+
+
+
+
+
+
+
+
     
 
