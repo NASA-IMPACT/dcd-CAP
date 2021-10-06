@@ -93,7 +93,7 @@ class CAP():
             cdi_datasets.append(dataset)
 
         self.cdi_datasets = cdi_datasets
-        self.broken_datasets = Export_Object_to_JSON(broken_datasets)
+        self.broken_datasets = broken_datasets
 
     def run_qa(self):
         '''This method uses self.cdi_datasets to run QA on the CDI Masterlist Datasets
@@ -130,7 +130,7 @@ class CAP():
             if notag:
                 notags.append(notag)
 
-        self.notags = Export_Object_to_JSON(notags)
+        self.notags = notags
 
         return self.notags
 
@@ -193,14 +193,19 @@ class CAP():
     def export_all(self):
         # return a dictionary with all required metrics
 
+        #Get JSONs if Necessary
+        updated_json = Export_Object_to_JSON(self.cdi_datasets)
+        notags_json = Export_Object_to_JSON(self.notags)
+        broken_json = Export_Object_to_JSON(self.broken_datasets)
+
         all_metrics = {
 
                         "CDI Metrics": self.cdi_metrics,
                         "Warnings Summary": self.warnings_summary,
-                        "Updated Masterlist": self.cdi_datasets,
+                        "Updated Masterlist": updated_json,
                         "Original Masterlist": self.original_masterlist,
-                        "Retag Datasets": self.notags,
-                        "Broken API": self.broken_datasets,
+                        "Retag Datasets": notags_json,
+                        "Broken API": broken_json,
                         "QA Updates": self.updates,
                         "Not in Masterlist": self.extras
 
