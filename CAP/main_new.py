@@ -72,11 +72,12 @@ class CAP():
         count = 1 # Initializes Count of Datasets for CDI_ID Renumbering
 
         masterlist_json = self.cdi_masterlist
+        date = self.date_instance
 
         for ds_json in masterlist_json:
 
             # Create Dataset Object
-            dataset = CDI_Dataset(ds_json)
+            dataset = CDI_Dataset(ds_json, date)
 
             # API URL and JSON is broken, add to broken list
             if dataset.full_api_json == "Broken":
@@ -192,6 +193,8 @@ class CAP():
 
     def export_all(self):
         # return a dictionary with all required metrics
+
+        date = self.date_instance
 
         #Get JSONs if Necessary
         updated_json = Export_Object_to_JSON(self.cdi_datasets)

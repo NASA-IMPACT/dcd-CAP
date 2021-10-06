@@ -4,9 +4,10 @@ import json
 
 class CDI_Dataset:
 
-	def __init__(self, dataset):
+	def __init__(self, dataset, date):
 		'''Parameter "dataset" is expected to be python dictionary type'''
 
+		self.date_id = date
 		self.cdi_id = dataset['cdi_id']
 		self.name = dataset['name']
 		self.title = dataset['title']
@@ -72,6 +73,7 @@ class CDI_Dataset:
 
 		dataset_dict = {}
 
+		dataset_dict['date'] = self.date_id
 		dataset_dict['cdi_id'] = self.cdi_id
 		dataset_dict['name'] = self.name
 		dataset_dict['title'] = self.title
