@@ -30,6 +30,7 @@ def CDI_Masterlist_QA(cdi_dataset):
 	datagov_id_change = Check_Datagov_ID(cdi_dataset)
 
 	# Compile the updates made and return them as a dictionary
+	change_dict["date_id"] = cdi_dataset.date_id
 	change_dict["cdi_id"] = cdi_dataset.cdi_id
 	change_dict['name'] = Invalid_Updated_toDict(name_change) # Index 0 correlates to Name
 	change_dict['title'] = Invalid_Updated_toDict(title_change)
