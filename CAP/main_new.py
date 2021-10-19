@@ -142,8 +142,8 @@ class CAP():
         the Climate Collection'''
 
         masterlist_json = self.cdi_masterlist
-
-        extras, climate_collection = Extra_Data_Gov(masterlist_json)
+        date = self.date_instance
+        extras, climate_collection = Extra_Data_Gov(masterlist_json, date)
 
         self.extras = extras
         self.climate_collection = climate_collection

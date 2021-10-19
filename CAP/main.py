@@ -188,7 +188,7 @@ def main():
 	#### Check for Datasets in CC, not in Masterlist ####
 
 	print('Checking for Datasets in the Data.gov Climate Collection\nthat are not in the CDI Master List....\n\n')
-	extras, climate_collection = Extra_Data_Gov(masterlist_json)
+	extras, climate_collection = Extra_Data_Gov(masterlist_json, today_quartered)
 
 	############################################
 	################# EXPORTS ##################

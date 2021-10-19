@@ -70,7 +70,7 @@ def Invalid_Updated_toDict(listof_invalid_updated):
 	return invalid_updates_dict
 
 #################################################################################
-def Extra_Data_Gov(masterlist_json):
+def Extra_Data_Gov(masterlist_json, date):
 	''' This function checks all the datasets in the data.gov climate group 
 	against the data gov ids in the masterlist to identify mislabeled data. '''
 
@@ -97,7 +97,7 @@ def Extra_Data_Gov(masterlist_json):
 			not_in_master_full = not_in_master_full.append(row)
 
 	# Reformat Output Dataframe and convert to Dictionary
-	formatted_df = pd.DataFrame({'Title':not_in_master_full['title'],'Name':not_in_master_full['name'],'API':not_in_master_full['API'],'Catalog':not_in_master_full['Catalog']})
+	formatted_df = pd.DataFrame({'Date':date,'Title':not_in_master_full['title'],'Name':not_in_master_full['name'],'API':not_in_master_full['API'],'Catalog':not_in_master_full['Catalog']})
 	dictionary = formatted_df.to_dict('index')
 	extra_list_of_dictionaries= [value for value in dictionary.values()]
 	
