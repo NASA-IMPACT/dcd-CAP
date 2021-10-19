@@ -29,13 +29,22 @@ class CAP():
     def __init__(self, cdi_masterlist):
         ''' Masterlist should be input in json format
         '''
+
+        self.interpret_time()
+
         if cdi_masterlist:
             self.cdi_masterlist = cdi_masterlist
-            self.original_masterlist = cdi_masterlist
+            self.archive_masterlist(cdi_masterlist)
         else:
             raise Exception("Please provide a master list")
 
-        self.interpret_time()
+    def archive_masterlist(self, cdi_masterlist):
+        '''Add Date_ID to Original Masterlist JSON'''
+
+        for og_ds in cdi_masterlist:
+            og_ds['date_id'] = self.date_instance
+        
+        self.original_masterlist = cdi_masterlist
 
     def interpret_time(self):
         ''' This method interprets the quarter time that the instance was run
@@ -158,9 +167,9 @@ class CAP():
         cc_count = len(self.climate_collection)
 
         cdi_metrics_dict = {
-                            "Date": date,
-                            "CDI Masterlist Count": ml_count,
-                            "Climate Collection Count": cc_count
+                            "date_id": date,
+                            "cdi_masterlist_count": ml_count,
+                            "climate_collection_count": cc_count
         }
 
         self.cdi_metrics = cdi_metrics_dict
@@ -180,11 +189,11 @@ class CAP():
         total_warnings = len(broken_datasets) + len(notags) + len(extras)
 
         warnings_dict = {
-                            "Date": date,
-                            "Total Warnings": total_warnings,
-                            "Broken URLs Count": len(broken_datasets),
-                            "Lost Climate Tag Count": len(notags),
-                            "Not in Masterlist Count": len(extras)
+                            "date_id": date,
+                            "total_warnings": total_warnings,
+                            "broken_url_count": len(broken_datasets),
+                            "lost_climate_tag_count": len(notags),
+                            "not_in_masterlist_count": len(extras)
         }
 
         self.warnings_summary = warnings_dict

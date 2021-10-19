@@ -97,7 +97,7 @@ def Extra_Data_Gov(masterlist_json, date):
 			not_in_master_full = not_in_master_full.append(row)
 
 	# Reformat Output Dataframe and convert to Dictionary
-	formatted_df = pd.DataFrame({'Date':date,'Title':not_in_master_full['title'],'Name':not_in_master_full['name'],'API':not_in_master_full['API'],'Catalog':not_in_master_full['Catalog']})
+	formatted_df = pd.DataFrame({'date_id':date,'title':not_in_master_full['title'],'name':not_in_master_full['name'],'api_url':not_in_master_full['API'],'catalog_url':not_in_master_full['Catalog']})
 	dictionary = formatted_df.to_dict('index')
 	extra_list_of_dictionaries= [value for value in dictionary.values()]
 	

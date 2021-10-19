@@ -73,7 +73,7 @@ class CDI_Dataset:
 
 		dataset_dict = {}
 
-		dataset_dict['date'] = self.date_id
+		dataset_dict['date_id'] = self.date_id
 		dataset_dict['cdi_id'] = self.cdi_id
 		dataset_dict['name'] = self.name
 		dataset_dict['title'] = self.title
