@@ -5,18 +5,19 @@ import datetime
 import os
 import argparse
 import pandas as pd
+import sys
 
 
 if __name__ == '__main__':
     from Code.cdi_class import CDI_Dataset
     from Code.cdi_validator import CDI_Masterlist_QA, Extra_Data_Gov
     from Code.tag_validator import Climate_Tag_Check, Export_Retag_Request
-    from Code.export_json import Export_Object_to_JSON, Export_Time_Series_JSON, Export_List_of_Dict_JSON, Export_Warnings_Summary_JSON
+    from Code.export_json import Export_Object_to_JSON, Export_Time_Series_JSON, Export_List_of_Dict_JSON, Export_Warnings_Summary_JSON, Export_Object_to_Dict
 else:
     from .Code.cdi_class import CDI_Dataset
     from .Code.cdi_validator import CDI_Masterlist_QA, Extra_Data_Gov
     from .Code.tag_validator import Climate_Tag_Check, Export_Retag_Request
-    from .Code.export_json import Export_Object_to_JSON, Export_Time_Series_JSON, Export_List_of_Dict_JSON, Export_Warnings_Summary_JSON
+    from .Code.export_json import Export_Object_to_JSON, Export_Time_Series_JSON, Export_List_of_Dict_JSON, Export_Warnings_Summary_JSON, Export_Object_to_Dict
 
 
 
@@ -206,9 +207,9 @@ class CAP():
         date = self.date_instance
 
         #Get JSONs if Necessary
-        updated_json = Export_Object_to_JSON(self.cdi_datasets)
-        notags_json = Export_Object_to_JSON(self.notags)
-        broken_json = Export_Object_to_JSON(self.broken_datasets)
+        updated_json = Export_Object_to_Dict(self.cdi_datasets)
+        notags_json = Export_Object_to_Dict(self.notags)
+        broken_json = Export_Object_to_Dict(self.broken_datasets)
 
         all_metrics = {
 
@@ -227,8 +228,141 @@ class CAP():
 
 
 
+if __name__ == "__main__":
+
+    # Create Directories for Local Run #
+
+    cwd = os.getcwd()
+    
+    directories = ['Output', 'Output/Retag','Output/RetagRequests','Output/OriginalMasterlist',
+                    'Output/UpdatedMasterlist','Output/QAUpdates','Output/BrokenAPI','Output/NotInMasterlist']
+
+    directory_dict = {}
+    for dr in directories:
+        path = os.path.join(cwd, dr)
+        try:
+            os.mkdir(path)
+        except:
+            pass
+
+        directory_dict[dr] = path
+
+    # parse command line arguments (argparse)
+    # --test
+
+    parser = argparse.ArgumentParser()
+    parser._action_groups.pop()
+
+    optionalargs = parser.add_argument_group("Optional Arguments")
+    optionalargs.add_argument("-test", "--test", action='store_true',required=False, help="Include to run CDI Scripts on Test Json File")
+    optionalargs.add_argument("-local", "--local", action="store", required=False, help="Include Local JSON Masterlist Path")
+
+    args = parser.parse_args()
+
+    if args.test:
+        test_loc = os.path.join(cwd, 'test/test_json.json')
+
+        try:
+            with open(test_loc) as testfile:
+                masterlist_json = json.load(testfile)
+        except:
+            print('The expected test file location is missing: "{}"'.format(test_loc))
+            sys.exit()
+    elif args.local:
+        local_loc = args.local
+
+        if os.path.exists(local_loc):
+            try:
+                with open(local_loc) as localfile:
+                    masterlist_json = json.load(localfile)
+            except:
+                print('Please ensure "{}"" is a file and not a directory'.format(local_loc))
+                sys.exit()
+        else:
+            print('{}" is not a valid file'.format(local_loc))
+            sys.exit()
+    else:
+        # Ingest from Live Github Repo (https://github.com/NASA-IMPACT/cdi_master/blob/master/cdi_master_update_2020.json)
+        github_response = urllib.request.urlopen(r'https://raw.githubusercontent.com/NASA-IMPACT/cdi_master/master/cdi_master_update_2020.json')
+        masterlist_json = json.load(github_response)
 
 
+    # Run the CAP Process on the provided Masterlist #
+    print("Running CDI Analysis Platform...\n")
+
+    cap = CAP(masterlist_json)
+    cap.ingest_datasets()
+
+    # Run QA
+    cap.run_qa()
+
+    # Execute Climate Tag Check
+    cap.climate_tag_check()
+
+    # Not in Masterlist Check
+    cap.not_in_masterlist_check()
+
+    # Create Metrics
+    cap.create_cdi_metrics()
+    cap.create_warnings_summary()
+
+    # Gather Metrics
+    all_metrics = cap.export_all()
+    date_instance = cap.date_instance
+ 
+    # Export All Metrics #
+
+    output_dir = os.path.join(cwd, 'Output')
+
+    #### Export Original JSON ####
+    og_json_filename = 'Original_CDI_Masterlist_{}.json'.format(date_instance)
+    og_output_path = os.path.join(directory_dict['Output/OriginalMasterlist'], og_json_filename)
+    og_output_json = json.dumps(masterlist_json, indent=4)
+
+    with open(og_output_path, 'w+') as og_outfile:
+        og_outfile.write(og_output_json)
+    
+    print('Exported Original CDI JSON: {}'.format(og_output_path))
+
+    #### Exporting Time Series Metrics ####
+    timeseries_loc = Export_Time_Series_JSON(all_metrics['CDI Metrics'], directory_dict["Output"])
+    print('Exported CDI Metrics: {}'.format(timeseries_loc))
+
+    #### Export Warnings Summary Master File ####
+    warnings_loc = Export_Warnings_Summary_JSON(all_metrics['Warnings Summary'], directory_dict["Output"])
+    print('Exported Warnings: {}'.format(warnings_loc))
+
+    #### Export QA Updates ####
+    qa_filename = 'QA_Updates_{}.json'.format(date_instance)
+    qa_loc = Export_List_of_Dict_JSON(all_metrics["QA Updates"], directory_dict['Output/QAUpdates'], qa_filename)
+    print('Exported QA Updates Made: {}'.format(qa_loc))
+
+    #### Export Retag Dataset ####
+    retag_filename = 'Retag_{}.json'.format(date_instance)
+    retag_loc = Export_List_of_Dict_JSON(all_metrics["Retag Datasets"], directory_dict['Output/Retag'], retag_filename)
+    print('Export Retag Datasets: {}'.format(retag_loc))
+
+    #### Export Retag Request Excel ####
+    retag_req_filename = 'Retag_Request_{}.xlsx'.format(date_instance)
+    retag_loc = Export_Retag_Request(cap.notags, directory_dict['Output/RetagRequests'],retag_req_filename)
+    print('Exported Retag Request: {}'.format(retag_loc))
+    
+    #### Export Updated JSON ####
+    updated_json_filename = 'Updated_CDI_Masterlist_{}.json'.format(date_instance)
+    json_loc = Export_List_of_Dict_JSON(all_metrics["Updated Masterlist"], directory_dict['Output/UpdatedMasterlist'], updated_json_filename)
+    print('Exported Updated CDI JSON: {}'.format(json_loc))
+
+    #### Export Broken Datasets ####
+    broken_filename = 'Broken_API_URLs_{}.json'.format(date_instance)
+    broken_loc = Export_List_of_Dict_JSON(all_metrics["Broken API"], directory_dict['Output/BrokenAPI'], broken_filename, broken=True)
+    print('Exported Updated CDI JSON: {}'.format(broken_loc))
+
+    #### Export Extra CDI Datasets #### 
+    extra_filename = 'Not_in_Masterlist_{}.json'.format(date_instance)
+    extra_loc = Export_List_of_Dict_JSON(all_metrics["Not in Masterlist"], directory_dict['Output/NotInMasterlist'], extra_filename)
+    print('Exported json of datasets not in the masterlist but on data.gov: {}'.format(extra_loc))
+
+    
 
 
 
