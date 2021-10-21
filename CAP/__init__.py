@@ -1,1 +1,1 @@
-from CAP.main_new import CAP
+from CAP.main import CAP
