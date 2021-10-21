@@ -27,9 +27,10 @@ def CDI_Masterlist_QA(cdi_dataset):
 	metadata_type_change = Check_Organization(cdi_dataset, api_json)
 
 	# Check datagov_id against api_url
-	datagov_id_change = Check_Datagov_ID(cdi_dataset)
+	#datagov_id_change = Check_Datagov_ID(cdi_dataset) # Removed due to redundancy
 
 	# Compile the updates made and return them as a dictionary
+	change_dict["datagov_id"] = cdi_dataset.datagov_ID
 	change_dict["date_id"] = cdi_dataset.date_id
 	change_dict["cdi_id"] = cdi_dataset.cdi_id
 	change_dict['name'] = Invalid_Updated_toDict(name_change) # Index 0 correlates to Name
@@ -37,12 +38,11 @@ def CDI_Masterlist_QA(cdi_dataset):
 	change_dict['organization'] = Invalid_Updated_toDict(org_change)
 	change_dict['catalog_url'] = Invalid_Updated_toDict(catalog_change) # Index 1 correlates to cat url
 	change_dict['metadata_type'] = Invalid_Updated_toDict(metadata_type_change)
-	change_dict['datagov_id'] = Invalid_Updated_toDict(datagov_id_change)
 
 	# Use below code to only return if the dictionary has updates
 	 
 	# Return dictionary IF there are values
-	change_list = [name_change, catalog_change, title_change, org_change, metadata_type_change, datagov_id_change]
+	change_list = [name_change, catalog_change, title_change, org_change, metadata_type_change]
 
 	for item in change_list:
 		if item != None:
