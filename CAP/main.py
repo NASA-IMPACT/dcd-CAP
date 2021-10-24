@@ -58,7 +58,7 @@ class CAP():
         quarter1 = ['03','04','05','06','07','08']
         quarter2 = ['09','10','11','12','13','14']
         quarter3 = ['15','16','17','18','19','20']
-        quarter4 = ['21','22','23','24','01','02']
+        quarter4 = ['21','22','23','00','01','02']
 
         if hour in quarter1:
             quarter = '1'
@@ -270,7 +270,8 @@ if __name__ == "__main__":
             sys.exit()
     else:
         # Ingest from Live Github Repo (https://github.com/NASA-IMPACT/cdi_master/blob/master/cdi_master_update_2020.json)
-        github_response = urllib.request.urlopen(r'https://raw.githubusercontent.com/NASA-IMPACT/cdi_master/master/cdi_master_update_2020.json')
+        #github_response = urllib.request.urlopen(r'https://raw.githubusercontent.com/NASA-IMPACT/cdi_master/master/cdi_master_update_2020.json')
+        github_response = urllib.request.urlopen(r'https://raw.githubusercontent.com/NASA-IMPACT/cdi_master/master/UpdatedMasterList_Aug2021.json')
         masterlist_json = json.load(github_response)
 
     # Create Directories
