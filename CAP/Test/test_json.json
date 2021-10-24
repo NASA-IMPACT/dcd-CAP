@@ -5,7 +5,7 @@
         "title": "2015 Cartographic Boundary File, State-Alaska Native Regional Corporation for Alaska, 1:500,000",
         "organization": "census-gov",
         "catalog_url": "https://catalog.data.gov/dataset/2015-cartographic-boundary-file-state-alaska-native-regional-corporation-for-alaska-1-500000",
-        "api_url": "https://catalog.data.gov/api/3/action/package_show?id=235a4e59-fae5-4f9e-9aae-7c3acf57a1f1",
+        "api_url": "https://catalog.data.gov/api/3/action/package_show?id=235a4e59-fae5-4f9e-9aae-7c3acf57a1f1BROKEN",
         "cdi_themes": "Permafrost and Arctic Landscapes; Arctic Development and Transport; Arctic",
         "metadata_type": "No metadata type",
         "geoplatform_id": "ab100c0c1f356b1ab420574d924dc518",
@@ -141,5 +141,18 @@
         "geoplatform_id": "Not Available",
         "datagov_ID": "b7476e9d-54aa-4b57-9aa1-46397054be0f",
         "status": "Active"
+    },
+    {
+        "cdi_id": 692,
+        "name": "african-easterly-wave-climatology-version-1",
+        "title": "African Easterly Wave Climatology, Version 1",
+        "organization": "noaa-gov",
+        "catalog_url": "https://catalog.data.gov/dataset/african-easterly-wave-climatology-version-1",
+        "api_url": "unavailable",
+        "cdi_themes": "Coastal Flooding",
+        "metadata_type": "geospatial",
+        "geoplatform_id": "85806afab89d6f1caf48eea8a27e0161",
+        "datagov_ID": "unavailable",
+        "status": "Not Active"
     }
 ]

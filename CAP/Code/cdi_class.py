@@ -29,13 +29,18 @@ class CDI_Dataset:
 		will apply a "broken" value to the full_api_json attribute'''
 		
 		api_url = self.api_url
-		try:
-			api_request = urllib.request.urlopen(api_url)
-			api_json = json.load(api_request)
-			self.full_api_json = api_json
 
-		except urllib.error.HTTPError:
-			self.full_api_json = "Broken"
+		if api_url == 'unavailable':
+			self.full_api_json = "unavailable"
+		else:
+
+			try:
+				api_request = urllib.request.urlopen(api_url)
+				api_json = json.load(api_request)
+				self.full_api_json = api_json
+
+			except urllib.error.HTTPError:
+				self.full_api_json = "Broken"
 
 	def update_cdi_id(self, new_value):
 		self.cdi_id = new_value

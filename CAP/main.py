@@ -71,27 +71,41 @@ class CAP():
 
         self.date_instance = ('{}_{}'.format(date,quarter))
 
-    def ingest_datasets(self):
+    def ingest_datasets(self, log=False):
         '''This method ingests the CDI masterlist as CDI Dataset Objects and Checks
         for Broken API Links
         '''
         #### Initialize list and add Dataset Objects ####
+        if log:
+            print("Ingesting Datasets")
 
         cdi_datasets = []
         broken_datasets = []
+        all_datasets = []
         count = 1 # Initializes Count of Datasets for CDI_ID Renumbering
 
         masterlist_json = self.cdi_masterlist
         date = self.date_instance
 
         for ds_json in masterlist_json:
+            
+            # Standard Output
+            if log:
+                number = masterlist_json.index(ds_json) + 1
+                percentage = round(number/len(masterlist_json) * 100, 2)
+                print('\r\tPercentage Complete: {}%'.format(percentage), end="")
 
             # Create Dataset Object
             dataset = CDI_Dataset(ds_json, date)
 
+            all_datasets.append(dataset)
+
             # API URL and JSON is broken, add to broken list
             if dataset.full_api_json == "Broken":
                 broken_datasets.append(dataset)
+                dataset.update_status('Not Active')
+                continue
+            elif dataset.full_api_json == "unavailable":
                 continue
 
             # Renumber CDI_ID
@@ -105,12 +119,15 @@ class CAP():
 
         self.cdi_datasets = cdi_datasets
         self.broken_datasets = broken_datasets
+        self.all_datasets = all_datasets
 
-    def run_qa(self):
+    def run_qa(self, log=False):
         '''This method uses self.cdi_datasets to run QA on the CDI Masterlist Datasets
         '''
 
         #### Start QA Analysis of CDI Masterlist ####
+        if log:
+            print("\nRunning QA Analysis")
         
         updates = []
 
@@ -122,6 +139,12 @@ class CAP():
 
             if an_update: # Empty Dictionary = False Bool
                 updates.append(an_update)
+
+            if log:
+                # Standard Output
+                number = cdi_datasets.index(cdi_dataset) + 1
+                percentage = round(number/len(cdi_datasets) * 100, 2)
+                print('\r\tPercentage Complete: {}%'.format(percentage), end="")
 
         self.updates = updates
 
@@ -207,7 +230,7 @@ class CAP():
         date = self.date_instance
 
         #Get JSONs if Necessary
-        updated_json = Export_Object_to_Dict(self.cdi_datasets)
+        updated_json = Export_Object_to_Dict(self.all_datasets)
         notags_json = Export_Object_to_Dict(self.notags)
         broken_json = Export_Object_to_Dict(self.broken_datasets)
 
@@ -293,10 +316,10 @@ if __name__ == "__main__":
     print("Running CDI Analysis Platform...\n")
 
     cap = CAP(masterlist_json)
-    cap.ingest_datasets()
+    cap.ingest_datasets(log=True)
 
     # Run QA
-    cap.run_qa()
+    cap.run_qa(log=True)
 
     # Execute Climate Tag Check
     cap.climate_tag_check()
@@ -324,7 +347,7 @@ if __name__ == "__main__":
     with open(og_output_path, 'w+') as og_outfile:
         og_outfile.write(og_output_json)
     
-    print('Exported Original CDI JSON: {}'.format(og_output_path))
+    print('\nExported Original CDI JSON: {}'.format(og_output_path))
 
     #### Exporting Time Series Metrics ####
     timeseries_loc = Export_Time_Series_JSON(all_metrics['CDI Metrics'], directory_dict["Output"])
