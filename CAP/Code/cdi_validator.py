@@ -5,7 +5,7 @@ import datetime
 import os
 import pandas as pd
 
-from Code.cdi_checks import *
+from .cdi_checks import *
 
 #################################################################################
 
@@ -26,25 +26,23 @@ def CDI_Masterlist_QA(cdi_dataset):
 	org_change = Check_Organization(cdi_dataset, api_json)
 	metadata_type_change = Check_Organization(cdi_dataset, api_json)
 
-	# Check for Climate Tag and gives True/False value for cdi_dataset.climate_tag
-	Check_Climate_Tag(cdi_dataset, api_json)
-
 	# Check datagov_id against api_url
-	datagov_id_change = Check_Datagov_ID(cdi_dataset)
+	#datagov_id_change = Check_Datagov_ID(cdi_dataset) # Removed due to redundancy
 
 	# Compile the updates made and return them as a dictionary
+	change_dict["datagov_id"] = cdi_dataset.datagov_ID
+	change_dict["date_id"] = cdi_dataset.date_id
 	change_dict["cdi_id"] = cdi_dataset.cdi_id
 	change_dict['name'] = Invalid_Updated_toDict(name_change) # Index 0 correlates to Name
 	change_dict['title'] = Invalid_Updated_toDict(title_change)
 	change_dict['organization'] = Invalid_Updated_toDict(org_change)
 	change_dict['catalog_url'] = Invalid_Updated_toDict(catalog_change) # Index 1 correlates to cat url
 	change_dict['metadata_type'] = Invalid_Updated_toDict(metadata_type_change)
-	change_dict['datagov_id'] = Invalid_Updated_toDict(datagov_id_change)
 
 	# Use below code to only return if the dictionary has updates
 	 
 	# Return dictionary IF there are values
-	change_list = [name_change, catalog_change, title_change, org_change, metadata_type_change, datagov_id_change]
+	change_list = [name_change, catalog_change, title_change, org_change, metadata_type_change]
 
 	for item in change_list:
 		if item != None:
@@ -72,7 +70,7 @@ def Invalid_Updated_toDict(listof_invalid_updated):
 	return invalid_updates_dict
 
 #################################################################################
-def Extra_Data_Gov(masterlist_json):
+def Extra_Data_Gov(masterlist_json, date):
 	''' This function checks all the datasets in the data.gov climate group 
 	against the data gov ids in the masterlist to identify mislabeled data. '''
 
@@ -99,7 +97,7 @@ def Extra_Data_Gov(masterlist_json):
 			not_in_master_full = not_in_master_full.append(row)
 
 	# Reformat Output Dataframe and convert to Dictionary
-	formatted_df = pd.DataFrame({'Title':not_in_master_full['title'],'Name':not_in_master_full['name'],'API':not_in_master_full['API'],'Catalog':not_in_master_full['Catalog']})
+	formatted_df = pd.DataFrame({'date_id':date,'title':not_in_master_full['title'],'name':not_in_master_full['name'],'api_url':not_in_master_full['API'],'catalog_url':not_in_master_full['Catalog']})
 	dictionary = formatted_df.to_dict('index')
 	extra_list_of_dictionaries= [value for value in dictionary.values()]
 	

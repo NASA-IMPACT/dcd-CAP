@@ -3,7 +3,7 @@ import json
 
 #################################################################################
 
-def Export_Object_to_JSON(cdi_datasets, output_location, filename, broken=False):
+def Export_Object_to_JSON(cdi_datasets, output_location=False, filename=False, broken=False):
 	'''This function takes all of the CDI Dataset objects (original)
 	and exports them as the full Original JSON
 	'''
@@ -12,10 +12,6 @@ def Export_Object_to_JSON(cdi_datasets, output_location, filename, broken=False)
 	if broken:
 		if len(cdi_datasets) == 0:
 			return "No Broken Datasets Found"
-
-	# Set Outfile parameters
-
-	output_path = os.path.join(output_location, filename)
 
 	# Convert objects into JSON
 	
@@ -29,10 +25,32 @@ def Export_Object_to_JSON(cdi_datasets, output_location, filename, broken=False)
 
 	output_json = json.dumps(list_of_datasets, indent=4)
 
-	with open(output_path, 'w+') as outfile:
-		outfile.write(output_json)
+	if output_location:
+		# Set Outfile parameters
+		output_path = os.path.join(output_location, filename)
 
-	return output_path
+		with open(output_path, 'w+') as outfile:
+			outfile.write(output_json)
+
+		return output_path
+
+	return output_json
+
+#################################################################################
+
+def Export_Object_to_Dict(cdi_datasets):
+	# Convert objects into JSON
+	
+	list_of_datasets = [] # Initialize list of dataset dictionaries (or json)
+
+	for dataset in cdi_datasets:
+
+		dataset_dict = dataset.export_dictionary() # Exports Dataset contents in dictionary
+
+		list_of_datasets.append(dataset_dict)
+
+	return list_of_datasets
+
 
 #################################################################################
 
@@ -78,11 +96,16 @@ def Export_Time_Series_JSON(time_series_dictionary, output_location):
 
 #################################################################################
 
-def Export_List_of_Dict_JSON(input_list_dict, output_location, filename):
+def Export_List_of_Dict_JSON(input_list_dict, output_location, filename, broken=False):
 	'''This function takes any input list of dictionaries and outputs them into a 
 	JSON format with the provied output_location and filename
 	'''
 	
+	# Check Optional Parameters
+	if broken:
+		if len(input_list_dict) == 0:
+			return "No Broken Datasets Found"
+
 	output_path = os.path.join(output_location, filename)
 
 	# Convert List of Dictionaries to JSON

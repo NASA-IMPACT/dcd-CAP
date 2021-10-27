@@ -9,12 +9,35 @@ def Climate_Tag_Check(cdi_dataset):
 	'''Checks the CDI Dataset Object's climate tag value and
 	returns Boolean value
 	'''
+	
+	# Checks for Climate Tag and gives True/False value for cdi_dataset.climate_tag
+	Check_Tag_Status(cdi_dataset)
+
 	climate_bool = cdi_dataset.climate_tag
 
 	if climate_bool == True:
 		return False
 	elif climate_bool == False:
 		return cdi_dataset
+
+#################################################################################
+
+def Check_Tag_Status(cdi_dataset):
+
+	# Check Climate Tag
+
+	api_json = cdi_dataset.full_api_json
+	
+	api_groups = api_json['result']['groups']
+
+	for i in range(len(api_groups)):
+		api_group_name = api_groups[i]['name']
+
+		if api_group_name == 'climate5434':
+			cdi_dataset.update_climate_tag_status(True)
+			return
+
+	cdi_dataset.update_climate_tag_status(False)
 
 #################################################################################
 

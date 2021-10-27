@@ -3,6 +3,11 @@ CAP/Code/__pycache__/
 CAP/__pycache__/
 Output/
 
+# Package Files
+CAP.egg-info/
+build/
+dist/
+
 # Any Environment Files Built
 .env/*
 ./.env/*

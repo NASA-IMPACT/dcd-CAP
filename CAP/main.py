@@ -5,317 +5,393 @@ import datetime
 import os
 import argparse
 import pandas as pd
+import sys
+
+
+if __name__ == '__main__':
+    from Code.cdi_class import CDI_Dataset
+    from Code.cdi_validator import CDI_Masterlist_QA, Extra_Data_Gov
+    from Code.tag_validator import Climate_Tag_Check, Export_Retag_Request
+    from Code.export_json import Export_Object_to_JSON, Export_Time_Series_JSON, Export_List_of_Dict_JSON, Export_Warnings_Summary_JSON, Export_Object_to_Dict
+else:
+    from .Code.cdi_class import CDI_Dataset
+    from .Code.cdi_validator import CDI_Masterlist_QA, Extra_Data_Gov
+    from .Code.tag_validator import Climate_Tag_Check, Export_Retag_Request
+    from .Code.export_json import Export_Object_to_JSON, Export_Time_Series_JSON, Export_List_of_Dict_JSON, Export_Warnings_Summary_JSON, Export_Object_to_Dict
+
+
+
+class CAP():
+    '''
+    Takes a Climate Collection Masterlist and Creates a Maintenance Instance with multiple
+    checking methods
+    '''
+
+    def __init__(self, cdi_masterlist):
+        ''' Masterlist should be input in json format
+        '''
+
+        self.interpret_time()
+
+        if cdi_masterlist:
+            self.cdi_masterlist = cdi_masterlist
+            self.archive_masterlist(cdi_masterlist)
+        else:
+            raise Exception("Please provide a master list")
+
+    def archive_masterlist(self, cdi_masterlist):
+        '''Add Date_ID to Original Masterlist JSON'''
 
-from Code.cdi_class import CDI_Dataset
-from Code.cdi_validator import CDI_Masterlist_QA, Extra_Data_Gov
-from Code.tag_validator import Climate_Tag_Check, Export_Retag_Request
-from Code.export_json import Export_Object_to_JSON, Export_Time_Series_JSON, Export_List_of_Dict_JSON, Export_Warnings_Summary_JSON
+        for og_ds in cdi_masterlist:
+            og_ds['date_id'] = self.date_instance
+        
+        self.original_masterlist = cdi_masterlist
+
+    def interpret_time(self):
+        ''' This method interprets the quarter time that the instance was run
+        '''
 
-#################################################################################
+        today = datetime.datetime.today()
+        hour = today.strftime("%H")
+        date = today.strftime("%Y_%m_%d")
 
-def getparser():
-	'''Collect command line arguments
-	'''
+        quarter1 = ['03','04','05','06','07','08']
+        quarter2 = ['09','10','11','12','13','14']
+        quarter3 = ['15','16','17','18','19','20']
+        quarter4 = ['21','22','23','00','01','02']
 
-	parser = argparse.ArgumentParser()
-	parser._action_groups.pop()
+        if hour in quarter1:
+            quarter = '1'
+        elif hour in quarter2:
+            quarter = '2'   
+        elif hour in quarter3:
+            quarter = '3'   
+        elif hour in quarter4:
+            quarter = '4'
 
-	optionalargs = parser.add_argument_group("Optional Arguments")
-	optionalargs.add_argument("-test", "--test", action='store_true',required=False, help="Include to run CDI Scripts on Test Json File")
+        self.date_instance = ('{}_{}'.format(date,quarter))
 
-	return parser
+    def ingest_datasets(self, log=False):
+        '''This method ingests the CDI masterlist as CDI Dataset Objects and Checks
+        for Broken API Links
+        '''
+        #### Initialize list and add Dataset Objects ####
+        if log:
+            print("Ingesting Datasets")
 
-#################################################################################
+        cdi_datasets = []
+        broken_datasets = []
+        all_datasets = []
+        count = 1 # Initializes Count of Datasets for CDI_ID Renumbering
 
-def interpret_time(today):
-	hour = today.strftime("%H")
-	date = today.strftime("%Y_%m_%d")
+        masterlist_json = self.cdi_masterlist
+        date = self.date_instance
 
-	quarter1 = ['03','04','05','06','07','08']
-	quarter2 = ['09','10','11','12','13','14']
-	quarter3 = ['15','16','17','18','19','20']
-	quarter4 = ['21','22','23','24','01','02']
+        for ds_json in masterlist_json:
+            
+            # Standard Output
+            if log:
+                number = masterlist_json.index(ds_json) + 1
+                percentage = round(number/len(masterlist_json) * 100, 2)
+                print('\r\tPercentage Complete: {}%'.format(percentage), end="")
 
-	if hour in quarter1:
-		quarter = '1'
-	elif hour in quarter2:
-		quarter = '2'	
-	elif hour in quarter3:
-		quarter = '3'	
-	elif hour in quarter4:
-		quarter = '4'
+            # Create Dataset Object
+            dataset = CDI_Dataset(ds_json, date)
 
-	return('{}_{}'.format(date,quarter))
+            all_datasets.append(dataset)
 
-##################################################################################
+            # API URL and JSON is broken, add to broken list
+            if dataset.full_api_json == "Broken":
+                broken_datasets.append(dataset)
+                dataset.update_status('Not Active')
+                continue
+            elif dataset.full_api_json == "unavailable":
+                continue
 
-def main():
+            # Renumber CDI_ID
 
-	# Get Command Arguments
-	parser = getparser()
-	args = parser.parse_args()
+            dataset.update_cdi_id(count)
+            count += 1
 
-	today = datetime.datetime.today()
-	today_quartered = interpret_time(today)
-	print("\nCDI Integrity Scripts\n\nDate: {}".format(today_quartered))
 
+            # Add dataset to list of dataset objects
+            cdi_datasets.append(dataset)
 
-	#### Define Directories ####
+        self.cdi_datasets = cdi_datasets
+        self.broken_datasets = broken_datasets
+        self.all_datasets = all_datasets
 
-	current_working_dir = os.getcwd()
+    def run_qa(self, log=False):
+        '''This method uses self.cdi_datasets to run QA on the CDI Masterlist Datasets
+        '''
 
-	# Create Directories
-	directories = ['Output', 'Output/Retag','Output/RetagRequests','Output/OriginalMasterlist',
-					'Output/UpdatedMasterlist','Output/QAUpdates','Output/BrokenAPI','Output/NotInMasterlist']
-	directory_dict = create_directories(current_working_dir, directories)
+        #### Start QA Analysis of CDI Masterlist ####
+        if log:
+            print("\nRunning QA Analysis")
+        
+        updates = []
 
+        cdi_datasets = self.cdi_datasets
 
-	#### Create Connection to Masterlist JSON ####
+        for cdi_dataset in cdi_datasets:
 
-	if args.test:
-		# Ingests from test JSON
-		testloc = os.path.join(current_working_dir, 'test/test_json.json')
-		with open(testloc) as testfile:
-			masterlist_json = json.load(testfile)
-	else:
-		# Ingest from Live Github Repo (https://github.com/NASA-IMPACT/cdi_master/blob/master/cdi_master_update_2020.json)
-		github_response = urllib.request.urlopen(r'https://raw.githubusercontent.com/NASA-IMPACT/cdi_master/master/cdi_master_update_2020.json')
-		masterlist_json = json.load(github_response)
-	
+            an_update = CDI_Masterlist_QA(cdi_dataset)
 
-	### Export Original JSON ###
-	og_json_filename = 'Original_CDI_Masterlist_{}.json'.format(today_quartered)
-	og_output_path = os.path.join(directory_dict['Output/OriginalMasterlist'], og_json_filename)
-	og_output_json = json.dumps(masterlist_json, indent=4)
+            if an_update: # Empty Dictionary = False Bool
+                updates.append(an_update)
 
-	with open(og_output_path, 'w+') as og_outfile:
-		og_outfile.write(og_output_json)
+            if log:
+                # Standard Output
+                number = cdi_datasets.index(cdi_dataset) + 1
+                percentage = round(number/len(cdi_datasets) * 100, 2)
+                print('\r\tPercentage Complete: {}%'.format(percentage), end="")
 
-	print('\n\nExported Original CDI JSON: {}\n'.format(og_output_path))
+        self.updates = updates
 
+        return self.updates
 
+    def climate_tag_check(self):
+        '''This method interprets the CDI Datasets and checks for it's climate tag in the CKAN API'''
 
-	#### Initialize list and add Dataset Objects ####
+        cdi_datasets = self.cdi_datasets
 
-	all_datasets = []
-	cdi_datasets = []
-	broken_datasets = []
-	count = 1 # Initializes Count of Datasets for CDI_ID Renumbering
+        notags = [] #Initialize list of notag datasets
 
-	print("Starting Dataset Ingest")
+        for cdi_dataset in cdi_datasets:
 
-	for ds_json in masterlist_json:
+            notag = Climate_Tag_Check(cdi_dataset)
 
-		# Create Dataset Object
-		dataset = CDI_Dataset(ds_json)
-		all_datasets.append(dataset)
+            if notag:
+                notags.append(notag)
 
+        self.notags = notags
 
-		# API URL and JSON is broken, add to broken list
-		if dataset.full_api_json == "Broken":
-			broken_datasets.append(dataset)
-			continue
+        return self.notags
 
-		# Renumber CDI_ID
+            
+    def not_in_masterlist_check(self):
+        '''This method interprets which datasets are in the Climate Collection that are not in the CDI
+        Masterlist, as well as create the self.climate_collection instance variable which is a dataframe of
+        the Climate Collection'''
 
-		dataset.update_cdi_id(count)
-		count += 1
+        masterlist_json = self.cdi_masterlist
+        date = self.date_instance
+        extras, climate_collection = Extra_Data_Gov(masterlist_json, date)
 
+        self.extras = extras
+        self.climate_collection = climate_collection
 
-		# Add dataset to list of dataset objects
-		cdi_datasets.append(dataset)
+        return self.extras
 
-		# Standard Output
-		number = masterlist_json.index(ds_json) + 1
-		percentage = round(number/len(masterlist_json) * 100, 2)
-		print('\r\tPercentage Complete: {}%'.format(percentage), end="")
+    def create_cdi_metrics(self):
+        '''This method exports the CDI Metrics of the instance including Climate Count and Masterlist Count'''
 
-	print()		
-	print('\tIngest Complete\n\n')
+        date = self.date_instance
+        ml_count = len(self.cdi_datasets)
+        cc_count = len(self.climate_collection)
 
-	#### Start QA Analysis of CDI Masterlist ####
-	
-	print("Starting CDI Masterlist QA Check")
+        cdi_metrics_dict = {
+                            "date_id": date,
+                            "cdi_masterlist_count": ml_count,
+                            "climate_collection_count": cc_count
+        }
 
-	updates = []
+        self.cdi_metrics = cdi_metrics_dict
 
-	for cdi_dataset in cdi_datasets:
+        return self.cdi_metrics
 
-		an_update = CDI_Masterlist_QA(cdi_dataset)
+    def create_warnings_summary(self):
+        '''This Method returns a dictionary of a CDI Warnings Summary Metrics
+        '''
+        ### Export Warnings Summary ###
+        
+        date = self.date_instance
+        broken_datasets = self.broken_datasets
+        notags = self.notags
+        extras = self.extras
 
-		if an_update: # Empty Dictionary = False Bool
-			updates.append(an_update)
-		
-		# Standard Output
-		number = cdi_datasets.index(cdi_dataset) + 1
-		percentage = round(number/len(cdi_datasets) * 100, 2)
-		print('\r\tPercentage Complete: {}%'.format(percentage), end="")
+        total_warnings = len(broken_datasets) + len(notags) + len(extras)
 
+        warnings_dict = {
+                            "date_id": date,
+                            "total_warnings": total_warnings,
+                            "broken_url_count": len(broken_datasets),
+                            "lost_climate_tag_count": len(notags),
+                            "not_in_masterlist_count": len(extras)
+        }
 
-	print()		
-	print('\tQA Check Complete\n\n')
+        self.warnings_summary = warnings_dict
 
+        return self.warnings_summary
 
+    def export_all(self):
+        # return a dictionary with all required metrics
 
-	#### Check for Climate Tag ####
+        date = self.date_instance
 
-	print("Starting CDI Climate Tag Check")
+        #Get JSONs if Necessary
+        updated_json = Export_Object_to_Dict(self.all_datasets)
+        notags_json = Export_Object_to_Dict(self.notags)
+        broken_json = Export_Object_to_Dict(self.broken_datasets)
 
-	notags = [] #Initialize list of notag datasets
+        all_metrics = {
 
-	for cdi_dataset in cdi_datasets:
+                        "CDI Metrics": self.cdi_metrics,
+                        "Warnings Summary": self.warnings_summary,
+                        "Updated Masterlist": updated_json,
+                        "Original Masterlist": self.original_masterlist,
+                        "Retag Datasets": notags_json,
+                        "Broken API": broken_json,
+                        "QA Updates": self.updates,
+                        "Not in Masterlist": self.extras
 
-		notag = Climate_Tag_Check(cdi_dataset)
+        }
 
-		if notag:
-			notags.append(notag)
+        return all_metrics
 
-		# Standard Tracking Output
-		number = cdi_datasets.index(cdi_dataset) + 1
-		percentage = round(number/len(cdi_datasets) * 100, 2)
-		print('\r\tPercentage Complete: {}%'.format(percentage), end="")
 
-	print()
-	print('\tClimate Check Complete\n\n')
 
-	#### Check for Datasets in CC, not in Masterlist ####
+if __name__ == "__main__":
 
-	print('Checking for Datasets in the Data.gov Climate Collection\nthat are not in the CDI Master List....\n\n')
-	extras, climate_collection = Extra_Data_Gov(masterlist_json)
+    # Create Directories for Local Run #
 
-	############################################
-	################# EXPORTS ##################
+    cwd = os.getcwd()
 
-	#### Export QA Updates ####
-	qa_filename = 'QA_Updates_{}.json'.format(today_quartered)
-	qa_loc = Export_List_of_Dict_JSON(updates, directory_dict['Output/QAUpdates'], qa_filename)
-	print('Exported QA Updates Made: {}\n'.format(qa_loc))
+    # parse command line arguments (argparse)
+    # --test
 
+    parser = argparse.ArgumentParser()
+    parser._action_groups.pop()
 
-	#### Export Retag Dataset ####
-	retag_filename = 'Retag_{}.json'.format(today_quartered)
-	retag_loc = Export_Object_to_JSON(notags, directory_dict['Output/Retag'], retag_filename)
-	print('Export Retag Datasets: {}\n'.format(retag_loc))
+    optionalargs = parser.add_argument_group("Optional Arguments")
+    optionalargs.add_argument("-test", "--test", action='store_true',required=False, help="Include to run CDI Scripts on Test Json File")
+    optionalargs.add_argument("-local", "--local", action="store", required=False, help="Include Local JSON Masterlist Path")
 
-	
-	#### Export Retag Request Excel ####
-	retag_req_filename = 'Retag_Request_{}.xlsx'.format(today_quartered)
-	retag_loc = Export_Retag_Request(notags, directory_dict['Output/RetagRequests'],retag_req_filename)
-	print('Exported Retag Request: {}\n'.format(retag_loc))
-	
+    args = parser.parse_args()
 
-	#### Export Updated JSON ####
-	updated_json_filename = 'Updated_CDI_Masterlist_{}.json'.format(today_quartered)
-	json_loc = Export_Object_to_JSON(cdi_datasets, directory_dict['Output/UpdatedMasterlist'], updated_json_filename)
-	print('Exported Updated CDI JSON: {}\n'.format(json_loc))
+    if args.test:
+        test_loc = os.path.join(cwd, 'test/test_json.json')
 
+        try:
+            with open(test_loc) as testfile:
+                masterlist_json = json.load(testfile)
+        except:
+            print('The expected test file location is missing: "{}"'.format(test_loc))
+            sys.exit()
+    elif args.local:
+        local_loc = args.local
 
-	#### Export Broken Datasets ####
-	broken_filename = 'Broken_API_URLs_{}.json'.format(today_quartered)
-	broken_loc = Export_Object_to_JSON(broken_datasets, directory_dict['Output/BrokenAPI'], broken_filename, broken=True)
-	print('Exported Updated CDI JSON: {}\n'.format(broken_loc))
+        if os.path.exists(local_loc):
+            try:
+                with open(local_loc) as localfile:
+                    masterlist_json = json.load(localfile)
+            except:
+                print('Please ensure "{}"" is a file and not a directory'.format(local_loc))
+                sys.exit()
+        else:
+            print('{}" is not a valid file'.format(local_loc))
+            sys.exit()
+    else:
+        # Ingest from Live Github Repo (https://github.com/NASA-IMPACT/cdi_master/blob/master/cdi_master_update_2020.json)
+        #github_response = urllib.request.urlopen(r'https://raw.githubusercontent.com/NASA-IMPACT/cdi_master/master/cdi_master_update_2020.json')
+        github_response = urllib.request.urlopen(r'https://raw.githubusercontent.com/NASA-IMPACT/cdi_master/master/UpdatedMasterList_Aug2021.json')
+        masterlist_json = json.load(github_response)
 
+    # Create Directories
 
-	#### Export Extra CDI Datasets #### FIXX
-	extra_filename = 'Not_in_Masterlist_{}.json'.format(today_quartered)
-	extra_loc = Export_List_of_Dict_JSON(extras, directory_dict['Output/NotInMasterlist'], extra_filename)
-	print('Exported json of datasets not in the masterlist but on data.gov: {}\n'.format(extra_loc))
+    directories = ['Output', 'Output/Retag','Output/RetagRequests','Output/OriginalMasterlist',
+                    'Output/UpdatedMasterlist','Output/QAUpdates','Output/BrokenAPI','Output/NotInMasterlist']
 
-	#### Exporting Time Series Metrics ####
+    directory_dict = {}
+    for dr in directories:
+        path = os.path.join(cwd, dr)
+        try:
+            os.mkdir(path)
+        except:
+            pass
 
-	'''
-	Come back to this way of counting Active Masterlist - 
-	Currently we are not updating the is_active attribute in the masterlist
+        directory_dict[dr] = path
 
-	cdi_datasets_df = obj_to_df(all_datasets)
-	ml_count = len(cdi_datasets_df[cdi_datasets_df['is_active']=="True"])# Only Including Working API links
-	'''
+    # Run the CAP Process on the provided Masterlist #
+    print("Running CDI Analysis Platform...\n")
 
-	date = today.strftime("%m/%d/%Y %I:%M %p")
-	ml_count = len(cdi_datasets) # List of objects which do not have broken API urls
-	cc_count = len(climate_collection) # from data.gov Climate Collection
+    cap = CAP(masterlist_json)
+    cap.ingest_datasets(log=True)
 
-	timeseries_dict = {
-						"Date":today_quartered,
-						"Masterlist_Count":ml_count,
-						"Climate_Collection_Count":cc_count
-	}
-	
-	timeseries_loc = Export_Time_Series_JSON(timeseries_dict, directory_dict["Output"])
-	print('Exported CDI Metrics: {}\n'.format(timeseries_loc))
+    # Run QA
+    cap.run_qa(log=True)
 
-	### Export Warnings Summary Master File ###
-	
-	date = today.strftime("%m/%d/%Y %I:%M %p")
-	total_warnings = len(broken_datasets) + len(notags) + len(extras)
+    # Execute Climate Tag Check
+    cap.climate_tag_check()
 
-	warnings_dict = {
-						"Date": today_quartered,
-						"Total Warnings": total_warnings,
-						"Broken URLs Count": len(broken_datasets),
-						"Lost Climate Tag Count": len(notags),
-						"Not in Masterlist Count": len(extras)
-	}
-	
-	warnings_loc = Export_Warnings_Summary_JSON(warnings_dict, directory_dict["Output"])
-	print('Exported Warnings: {}\n'.format(warnings_loc))
+    # Not in Masterlist Check
+    cap.not_in_masterlist_check()
 
+    # Create Metrics
+    cap.create_cdi_metrics()
+    cap.create_warnings_summary()
 
-#################################################################################
+    # Gather Metrics
+    all_metrics = cap.export_all()
+    date_instance = cap.date_instance
+ 
+    # Export All Metrics #
 
-def create_directories(main_dir, directories_list):
-	'''This function creates the directories based on the input 
-	directory list
-	'''
+    output_dir = os.path.join(cwd, 'Output')
 
-	directories = {}
+    #### Export Original JSON ####
+    og_json_filename = 'Original_CDI_Masterlist_{}.json'.format(date_instance)
+    og_output_path = os.path.join(directory_dict['Output/OriginalMasterlist'], og_json_filename)
+    og_output_json = json.dumps(masterlist_json, indent=4)
 
-	for dr in directories_list:
-		path = os.path.join(main_dir, dr)
-		try:
-			os.mkdir(path)
-		except:
-			pass
+    with open(og_output_path, 'w+') as og_outfile:
+        og_outfile.write(og_output_json)
+    
+    print('\nExported Original CDI JSON: {}'.format(og_output_path))
 
-		directories[dr] = path
+    #### Exporting Time Series Metrics ####
+    timeseries_loc = Export_Time_Series_JSON(all_metrics['CDI Metrics'], directory_dict["Output"])
+    print('Exported CDI Metrics: {}'.format(timeseries_loc))
 
-	return directories
+    #### Export Warnings Summary Master File ####
+    warnings_loc = Export_Warnings_Summary_JSON(all_metrics['Warnings Summary'], directory_dict["Output"])
+    print('Exported Warnings: {}'.format(warnings_loc))
 
-#################################################################################
+    #### Export QA Updates ####
+    qa_filename = 'QA_Updates_{}.json'.format(date_instance)
+    qa_loc = Export_List_of_Dict_JSON(all_metrics["QA Updates"], directory_dict['Output/QAUpdates'], qa_filename)
+    print('Exported QA Updates Made: {}'.format(qa_loc))
 
-def obj_to_df(cdi_datasets):
-	'''This function creates a panda dataframe from an input list
-	of CDI Objects
-	'''
+    #### Export Retag Dataset ####
+    retag_filename = 'Retag_{}.json'.format(date_instance)
+    retag_loc = Export_List_of_Dict_JSON(all_metrics["Retag Datasets"], directory_dict['Output/Retag'], retag_filename)
+    print('Export Retag Datasets: {}'.format(retag_loc))
 
-	list_of_datasets = [] # Initialize list of dataset dictionaries (or json)
+    #### Export Retag Request Excel ####
+    retag_req_filename = 'Retag_Request_{}.xlsx'.format(date_instance)
+    retag_loc = Export_Retag_Request(cap.notags, directory_dict['Output/RetagRequests'],retag_req_filename)
+    print('Exported Retag Request: {}'.format(retag_loc))
+    
+    #### Export Updated JSON ####
+    updated_json_filename = 'Updated_CDI_Masterlist_{}.json'.format(date_instance)
+    json_loc = Export_List_of_Dict_JSON(all_metrics["Updated Masterlist"], directory_dict['Output/UpdatedMasterlist'], updated_json_filename)
+    print('Exported Updated CDI JSON: {}'.format(json_loc))
 
-	for dataset in obj:
+    #### Export Broken Datasets ####
+    broken_filename = 'Broken_API_URLs_{}.json'.format(date_instance)
+    broken_loc = Export_List_of_Dict_JSON(all_metrics["Broken API"], directory_dict['Output/BrokenAPI'], broken_filename, broken=True)
+    print('Exported Updated CDI JSON: {}'.format(broken_loc))
 
-		dataset_dict = dataset.export_dictionary() # Exports Dataset contents in dictionary
+    #### Export Extra CDI Datasets #### 
+    extra_filename = 'Not_in_Masterlist_{}.json'.format(date_instance)
+    extra_loc = Export_List_of_Dict_JSON(all_metrics["Not in Masterlist"], directory_dict['Output/NotInMasterlist'], extra_filename)
+    print('Exported json of datasets not in the masterlist but on data.gov: {}'.format(extra_loc))
 
-		list_of_datasets.append(dataset_dict)
+    
 
-	cdi_df = pd.DataFrame(list_of_datasets)
 
-	return(cdi_df)
 
-#################################################################################
 
 
-
-if __name__ == '__main__' :
-	main()
-
-
-
-
-
-
-
-
-
-
-
-
+    
 
