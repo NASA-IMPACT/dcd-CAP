@@ -21,7 +21,7 @@ def CDI_Masterlist_QA(cdi_dataset):
 
 	# Crossreference the CKAN API for dataset and check/update masterlist values
 	name_change, catalog_change = Check_Name_and_Update_Caturl(cdi_dataset, api_json)
-	catalog_change = Check_Catalog_URL_Status(cdi_dataset, catalog_change)
+	#catalog_change = Check_Catalog_URL_Status(cdi_dataset, catalog_change)
 	title_change = Check_Title(cdi_dataset, api_json)
 	org_change = Check_Organization(cdi_dataset, api_json)
 	metadata_type_change = Check_Organization(cdi_dataset, api_json)
