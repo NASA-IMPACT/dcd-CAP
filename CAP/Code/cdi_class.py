@@ -40,7 +40,13 @@ class CDI_Dataset:
 				self.full_api_json = api_json
 
 			except urllib.error.HTTPError:
-				self.full_api_json = "Broken"
+				try:
+					name_url = f"https://catalog.data.gov/api/3/action/package_show?id={self.name}"
+					api_request = urllib.request.urlopen(name_url)
+					api_json = json.load(api_request)
+					self.full_api_json = api_json
+				except urllib.error.HTTPError:
+					self.full_api_json = "Broken"
 
 	def update_cdi_id(self, new_value):
 		self.cdi_id = new_value
